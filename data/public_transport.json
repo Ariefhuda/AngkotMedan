@@ -1,0 +1,12 @@
+[
+{"id":"TMD1","name":"Trans Metro Deli 1","type":"BRT","color":"#0066cc","icon":"bus","waypoints":["T. Pinang Baris","Jl. Gatot Subroto","Lap. Merdeka","Sun Plaza","Stasiun KA","Pajak Ikan Lama","Plaza Medan Fair","T. Amplas"]},
+{"id":"TMD2","name":"Trans Metro Deli 2","type":"BRT","color":"#0066cc","icon":"bus","waypoints":["T. Pinang Baris","Jl. Gatot Subroto","Lap. Merdeka","Sun Plaza","Padang Bulan","Tj. Selamat"]},
+{"id":"TMD3","name":"Trans Metro Deli 3","type":"BRT","color":"#0066cc","icon":"bus","waypoints":["T. Pinang Baris","Jl. Gatot Subroto","Lap. Merdeka","Sun Plaza","Padang Bulan","Simp. Pos","Tembung"]},
+{"id":"TMD4","name":"Trans Metro Deli 4","type":"BRT","color":"#0066cc","icon":"bus","waypoints":["T. Belawan","Belawan","Gabion","Pancur Batu","Simp. Selayang","Simp. Pos","Padang Bulan"]},
+{"id":"TMD5","name":"Trans Metro Deli 5","type":"BRT","color":"#0066cc","icon":"bus","waypoints":["T. Amplas","Jl. Sisingamangaraja","Merdeka Walk","Lap. Merdeka","Padang Bulan","Helvetia","T. Pinang Baris"]},
+{"id":"TMD6","name":"Trans Metro Deli 6","type":"BRT","color":"#0066cc","icon":"bus","waypoints":["T. Pinang Baris","Jl. Gatot Subroto","Lap. Merdeka","Sun Plaza","RSU Adam Malik","Pringgan","Pancur Batu"]},
+{"id":"TMD7","name":"Trans Metro Deli 7","type":"BRT","color":"#0066cc","icon":"bus","waypoints":["T. Pinang Baris","Jl. Gatot Subroto","Lap. Merdeka","Sun Plaza","Padang Bulan","Pancur Batu"]},
+{"id":"BL1","name":"Bus Listrik Medan 1","type":"Listrik","color":"#00cc66","icon":"zap","waypoints":["T. Pinang Baris","Jl. Gatot Subroto","Lap. Merdeka","Stasiun KA","Merdeka Walk","Sun Plaza","Padang Bulan","USU"]},
+{"id":"BL2","name":"Bus Listrik Medan 2","type":"Listrik","color":"#00cc66","icon":"zap","waypoints":["T. Amplas","Jl. Sisingamangaraja","Merdeka Walk","Lap. Merdeka","Sun Plaza","Padang Bulan","Tj. Selamat"]},
+{"id":"BL3","name":"Bus Listrik Medan 3","type":"Listrik","color":"#00cc66","icon":"zap","waypoints":["T. Belawan","Belawan","Gabion","Pancur Batu","Simp. Selayang","Padang Bulan","Sun Plaza","Lap. Merdeka","T. Pinang Baris"]}
+]

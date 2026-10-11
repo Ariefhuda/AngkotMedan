@@ -632,3 +632,8 @@ input:focus, button:focus-visible {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
+/* Kartu pilihan rute: ringkasannya bisa diketuk untuk membuka langkah dan peta. */
+details.itinerary > summary::-webkit-details-marker { display: none; }
+details.itinerary > summary:focus-visible { outline: 3px solid #4da2ff; outline-offset: -3px; }
+details.itinerary .itinerary-toggle::after { content: "Lihat langkahnya"; }
+details.itinerary[open] .itinerary-toggle::after { content: "Tutup"; }

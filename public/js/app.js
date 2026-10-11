@@ -449,168 +449,31 @@ function applyLang(lang) {
   if (langLabel) langLabel.textContent = lang.toUpperCase();
 }
 
-// Singkatan yang dipakai di data trayek, disamakan dulu supaya "Terminal Amplas" cocok dengan "T. Amplas".
-const STOP_ABBREVIATIONS = { t: "terminal", simp: "simpang", jl: "jalan", psr: "pasar", rsu: "rs", rsup: "rs" };
+// ===== DATA =====
+// Trayek dan halte diambil dari server saat halaman dibuka. Pencarian rute sendiri
+// dikerjakan server (/api/navigate); data ini dipakai untuk daftar trayek dan peta.
+let ANGKOT_ROUTES = [];
+let STOP_COORDS = {};
+let ALL_STOPS = [];
+let POPULAR_ROUTES = [];
+
+async function loadData() {
+  const res = await fetch("/api/data");
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  ANGKOT_ROUTES = data.routes;
+  STOP_COORDS = data.stops;
+  ALL_STOPS = Object.keys(data.stops);
+  POPULAR_ROUTES = data.popular;
+}
 
 function normalize(str) {
   if (!str) return "";
-  return str.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean)
-    .map(w => STOP_ABBREVIATIONS[w] || w).join(" ");
-}
-
-function stopsMatch(input, stop) {
-  const ni = normalize(input);
-  const ns = normalize(stop);
-  if (!ni || !ns) return false;
-  if (ni === ns) return true;
-  // Salah satu nama memuat nama lainnya secara utuh per kata ("Amplas" di dalam "Terminal Amplas").
-  if (ni.length >= 3 && ns.length >= 3 && (` ${ns} `.includes(` ${ni} `) || ` ${ni} `.includes(` ${ns} `))) return true;
-
-  const inputWords = ni.split(" ");
-  const stopWords = ns.split(" ");
-  const longStopWords = stopWords.filter(w => w.length >= 3);
-  if (inputWords.length === 1) {
-    if (ni.length < 3) return false;
-    return longStopWords.some(sw => sw.startsWith(ni) || ni.startsWith(sw));
-  }
-  // Kata pendek (angka romawi, huruf seperti "B" pada "Simalingkar B") harus sama persis.
-  // Kalau dicocokkan longgar, "Belawan" ikut cocok dengan semua halte yang punya kata "B".
-  return inputWords.every(iw => iw.length < 3
-    ? stopWords.includes(iw)
-    : longStopWords.some(sw => sw.includes(iw) || iw.includes(sw)));
+  return str.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function getStopCoords(stopName) {
-  if (typeof STOP_COORDS === 'undefined') return null;
-  if (STOP_COORDS[stopName]) return STOP_COORDS[stopName];
-  const normalized = normalize(stopName);
-  for (const [name, coords] of Object.entries(STOP_COORDS)) {
-    if (normalize(name) === normalized) return coords;
-  }
-  for (const [name, coords] of Object.entries(STOP_COORDS)) {
-    if (stopsMatch(stopName, name)) return coords;
-  }
-  return null;
-}
-
-function findStop(input) {
-  if (!input || input.trim().length < 2 || typeof ALL_STOPS === 'undefined') return null;
-  const normalized = normalize(input);
-  for (const stop of ALL_STOPS) {
-    if (normalize(stop) === normalized) return stop;
-  }
-  for (const stop of ALL_STOPS) {
-    if (stopsMatch(input, stop)) return stop;
-  }
-  return null;
-}
-
-function stopIndexInRoute(route, stop) {
-  for (let i = 0; i < route.waypoints.length; i++) {
-    if (normalize(route.waypoints[i]) === normalize(stop)) return i;
-  }
-  for (let i = 0; i < route.waypoints.length; i++) {
-    if (stopsMatch(stop, route.waypoints[i])) return i;
-  }
-  return -1;
-}
-
-function scoreRoute(result) {
-  const stops = result.subWaypoints ? result.subWaypoints.length : 10;
-  let score = 0;
-  if (!result.transfer) score += 0;
-  else if (result.transfers === 1) score += 100;
-  else score += 200 + (result.transfers || 0) * 50;
-  score += stops;
-  return score;
-}
-
-function findDirectRoutes(origin, destination) {
-  if (typeof ANGKOT_ROUTES === 'undefined') return [];
-  const results = [];
-  ANGKOT_ROUTES.forEach(route => {
-    const oi = stopIndexInRoute(route, origin);
-    const di = stopIndexInRoute(route, destination);
-    if (oi !== -1 && di !== -1 && oi !== di) {
-      const forward = oi < di;
-      // Trayek satu arah (pp: false) hanya bisa dinaiki searah urutan haltenya.
-      if (forward || route.pp) {
-        const start = Math.min(oi, di);
-        const end = Math.max(oi, di);
-        const subWaypoints = route.waypoints.slice(start, end + 1);
-        if (!forward && route.pp) subWaypoints.reverse();
-        results.push({ route, originStop: route.waypoints[oi], destStop: route.waypoints[di], subWaypoints, transfer: false, score: 0 });
-      }
-    }
-  });
-  results.forEach(r => r.score = scoreRoute(r));
-  results.sort((a, b) => a.score - b.score);
-  if (results.length > 0) results[0].bestMatch = true;
-  return results;
-}
-
-function findTransferRoutes(origin, destination) {
-  if (typeof ANGKOT_ROUTES === 'undefined') return [];
-  const results = [];
-  const originRoutes = ANGKOT_ROUTES.filter(r => stopIndexInRoute(r, origin) !== -1);
-  const destRoutes = ANGKOT_ROUTES.filter(r => stopIndexInRoute(r, destination) !== -1);
-
-  // Bisa ditempuh dari indeks a ke b? Trayek satu arah hanya maju.
-  const reachable = (route, a, b) => a !== b && (a < b || route.pp);
-  const segment = (route, a, b) => {
-    const sub = route.waypoints.slice(Math.min(a, b), Math.max(a, b) + 1);
-    return a > b ? sub.reverse() : sub;
-  };
-
-  originRoutes.forEach(r1 => {
-    const oIdx = stopIndexInRoute(r1, origin);
-    // Kalau r1 sendiri sampai ke tujuan, itu sudah muncul sebagai rute langsung.
-    const r1Dest = stopIndexInRoute(r1, destination);
-    if (r1Dest !== -1 && reachable(r1, oIdx, r1Dest)) return;
-
-    destRoutes.forEach(r2 => {
-      if (r1.id === r2.id) return;
-      const dIdx = stopIndexInRoute(r2, destination);
-      const r2Origin = stopIndexInRoute(r2, origin);
-      if (r2Origin !== -1 && reachable(r2, r2Origin, dIdx)) return;
-
-      // Dari semua halte yang dilewati kedua trayek, pilih titik pindah dengan halte paling sedikit.
-      let best = null;
-      r2.waypoints.forEach((wp, tIdx2) => {
-        const tIdx = r1.waypoints.findIndex(w => normalize(w) === normalize(wp));
-        if (tIdx === -1) return;
-        if (!reachable(r1, oIdx, tIdx) || !reachable(r2, tIdx2, dIdx)) return;
-        const sub1 = segment(r1, oIdx, tIdx);
-        const sub2 = segment(r2, tIdx2, dIdx);
-        if (!best || sub1.length + sub2.length < best.leg1.subWaypoints.length + best.leg2.subWaypoints.length) {
-          best = {
-            leg1: { route: r1, originStop: r1.waypoints[oIdx], destStop: wp, subWaypoints: sub1 },
-            leg2: { route: r2, originStop: wp, destStop: r2.waypoints[dIdx], subWaypoints: sub2 },
-            transferStop: wp,
-            transferCount: 1
-          };
-        }
-      });
-      if (best) results.push(best);
-    });
-  });
-
-  const seen = new Set();
-  const unique = results.filter(r => {
-    const key = `${r.leg1.route.id}-${r.leg2.route.id}-${r.transferStop}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-
-  unique.forEach(r => {
-    const stops1 = r.leg1.subWaypoints.length;
-    const stops2 = r.leg2.subWaypoints.length;
-    r.score = 100 + stops1 + stops2;
-  });
-  unique.sort((a, b) => a.score - b.score);
-  if (unique.length > 0) unique[0].bestMatch = true;
-  return unique;
+  return STOP_COORDS[stopName] || null;
 }
 
 function getLiveryColor(warna) {
@@ -689,36 +552,65 @@ function switchView(view) {
   }
 }
 
-function performSearch() {
+// Titik yang dipilih dari saran atau GPS disimpan di input tersembunyi sebagai JSON {name, lat, lng}.
+// Kalau kosong, teks yang diketik dikirim apa adanya dan server yang mencocokkannya.
+function readPoint(inputEl, hiddenEl, prefix, params) {
+  let picked = null;
+  try { picked = hiddenEl.value ? JSON.parse(hiddenEl.value) : null; } catch { picked = null; }
+  if (picked && Number.isFinite(picked.lat) && Number.isFinite(picked.lng)) {
+    params.set(`${prefix}_lat`, picked.lat);
+    params.set(`${prefix}_lng`, picked.lng);
+    params.set(`${prefix}_name`, picked.name || inputEl.value.trim());
+  } else {
+    params.set(prefix, inputEl.value.trim());
+  }
+}
+
+function setPoint(inputEl, hiddenEl, point) {
+  inputEl.value = point.name;
+  hiddenEl.value = JSON.stringify({ name: point.name, lat: point.lat, lng: point.lng });
+}
+
+function showSearchError(message) {
+  const errEl = document.getElementById("search-error");
+  if (!errEl) return;
+  errEl.textContent = message;
+  errEl.classList.toggle("hidden", !message);
+}
+
+async function performSearch() {
   const originInput = document.getElementById("origin-input");
   const destInput = document.getElementById("dest-input");
-  const originValue = document.getElementById("origin-resolved").value || originInput.value;
-  const destValue = document.getElementById("dest-resolved").value || destInput.value;
-
-  const errEl = document.getElementById("search-error");
-  if (!originValue.trim() || !destValue.trim()) {
-    if (errEl) {
-      errEl.textContent = "Isi kedua kolom asal dan tujuan terlebih dahulu, lek!";
-      errEl.classList.remove("hidden");
-    }
+  if (!originInput.value.trim() || !destInput.value.trim()) {
+    showSearchError("Isi dulu tempat asal dan tujuannya, lek.");
     return;
   }
-  if (errEl) errEl.classList.add("hidden");
+  showSearchError("");
 
-  showLoading(originValue, destValue);
+  const params = new URLSearchParams();
+  readPoint(originInput, document.getElementById("origin-resolved"), "from", params);
+  readPoint(destInput, document.getElementById("dest-resolved"), "to", params);
 
-  setTimeout(() => {
-    const resolvedOrigin = findStop(originValue) || originValue;
-    const resolvedDest = findStop(destValue) || destValue;
-
-    const direct = findDirectRoutes(resolvedOrigin, resolvedDest);
-    const transfer = findTransferRoutes(resolvedOrigin, resolvedDest);
-
-    searchResults = { origin: resolvedOrigin, destination: resolvedDest, direct, transfer, multiTransfer: [], pubTransport: [] };
+  showLoading(originInput.value.trim(), destInput.value.trim());
+  try {
+    const res = await fetch(`/api/navigate?${params}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    searchResults = await res.json();
+  } catch {
     hideLoading();
-    renderResults();
-    switchView("result");
-  }, 600);
+    showSearchError("Server tidak bisa dihubungi. Periksa koneksi internet, lalu cari lagi.");
+    return;
+  }
+  hideLoading();
+
+  // Tempat yang tidak dikenali ditangani di form, supaya pengguna bisa langsung membetulkan ketikannya.
+  if (searchResults.reason === "unknown_origin" || searchResults.reason === "unknown_destination") {
+    const which = searchResults.reason === "unknown_origin" ? "asal" : "tujuan";
+    showSearchError(`Tempat ${which} "${searchResults.text}" tidak dikenali. Ketik ulang, lalu pilih salah satu saran yang muncul.`);
+    return;
+  }
+  renderResults();
+  switchView("result");
 }
 
 function showLoading(origin, dest) {
@@ -735,317 +627,198 @@ function hideLoading() {
   if (overlay) overlay.classList.add("hidden");
 }
 
+function escapeHtml(str) {
+  return String(str ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+function formatMeters(m) {
+  return m >= 1000 ? `${(m / 1000).toFixed(1).replace(".", ",")} km` : `${Math.round(m / 10) * 10} m`;
+}
+
+function formatMinutes(min) {
+  if (min < 60) return `${min} mnt`;
+  const h = Math.floor(min / 60), m = min % 60;
+  return m ? `${h} jam ${m} mnt` : `${h} jam`;
+}
+
+// Pesan saat tidak ada rute: apa yang terjadi dan apa yang bisa dilakukan.
+function emptyResultMessage(result) {
+  const from = escapeHtml(result.from.name), to = escapeHtml(result.to.name);
+  if (result.reason === "walk") {
+    return {
+      icon: "footprints",
+      title: "Jalan kaki saja",
+      body: `<strong>${from}</strong> dan <strong>${to}</strong> hanya berjarak sekitar ${formatMeters(result.meters)}, kira-kira ${result.minutes} menit jalan kaki. Tidak perlu naik angkot.`,
+    };
+  }
+  if (result.reason === "no_stop_near_origin" || result.reason === "no_stop_near_destination") {
+    const place = result.reason === "no_stop_near_origin" ? from : to;
+    const near = result.nearest;
+    return {
+      icon: "map-pin-off",
+      title: "Tidak ada halte angkot di dekat situ",
+      body: `Dalam jarak 1 km dari <strong>${place}</strong> tidak ada halte yang tercatat. Halte terdekat adalah <strong>${escapeHtml(near.name)}</strong>, sekitar ${formatMeters(near.meters)} dari sana. Coba cari dari halte itu.`,
+    };
+  }
+  return {
+    icon: "search-x",
+    title: "Belum ada rangkaian angkot ke sana",
+    body: `Dari <strong>${from}</strong> ke <strong>${to}</strong> tidak ketemu rute dengan paling banyak dua kali pindah angkot. Coba pilih halte lain di dekat asal atau tujuan.`,
+  };
+}
+
 function renderResults() {
   const container = document.getElementById("results-container");
   if (!container) return;
-  
-  if (!searchResults) { 
-    container.innerHTML = ""; 
-    return; 
-  }
+  if (!searchResults) { container.innerHTML = ""; return; }
 
-  const { direct, transfer } = searchResults;
-  const origin = escapeHtml(searchResults.origin);
-  const destination = escapeHtml(searchResults.destination);
-  const totalCount = direct.length + transfer.length;
-  let html = "";
+  const { from, to, itineraries } = searchResults;
+  const backBtn = `
+    <button onclick="switchView('home')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#ffd731] border-2 border-[#000000] shadow-brutal-sm rounded-pill font-display text-xs font-bold hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i> Cari rute lain
+    </button>`;
 
-  html += `
+  let html = `
     <div class="mb-6 bg-white border-2 border-[#000000] shadow-brutal p-5 rounded-2xl">
-      ${totalCount > 0 ? `<div class="flex items-center gap-3 mb-2">
-        <h2 class="font-display text-2xl font-bold text-[#000000]" data-i18n="result_title">Rute Ditemukan</h2>
-        <span class="px-3 py-0.5 rounded-pill text-xs font-bold bg-[#ffd731] border-2 border-[#000000] shadow-brutal-sm">${totalCount} rute</span>
-      </div>` : ""}
-      <p class="font-body text-sm text-[#000]/60">
-        <span class="font-bold text-[#000000]">${origin}</span> 
-        <i data-lucide="arrow-right" class="w-3.5 h-3.5 inline mx-1"></i> 
-        <span class="font-bold text-[#000000]">${destination}</span>
+      <p class="font-body text-xs text-[#000]/50 mb-1">${itineraries.length > 0 ? `${itineraries.length} pilihan rute, tercepat di atas` : "Hasil pencarian"}</p>
+      <p class="font-display text-lg sm:text-xl font-bold text-[#000000] leading-snug">
+        ${escapeHtml(from.name)}
+        <i data-lucide="arrow-right" class="w-4 h-4 inline mx-1 -mt-1"></i>
+        ${escapeHtml(to.name)}
       </p>
-    </div>
-  `;
+    </div>`;
 
-  if (direct.length === 0 && transfer.length === 0) {
+  if (itineraries.length === 0) {
+    const msg = emptyResultMessage(searchResults);
     html += `
-      <div class="bg-white border-2 border-[#000000] shadow-brutal p-8 rounded-2xl text-center">
-        <div class="w-14 h-14 bg-[#fb4903]/10 border-2 border-[#fb4903]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i data-lucide="search-x" class="w-7 h-7 text-[#fb4903]"></i>
+      <div class="bg-white border-2 border-[#000000] shadow-brutal p-6 sm:p-8 rounded-2xl">
+        <div class="w-12 h-12 bg-[#fb4903]/10 border-2 border-[#fb4903]/30 rounded-full flex items-center justify-center mb-4">
+          <i data-lucide="${msg.icon}" class="w-6 h-6 text-[#fb4903]"></i>
         </div>
-        <h3 class="font-display text-lg font-bold text-[#000000] mb-2">Tidak Ada Rute</h3>
-        <p class="font-body text-sm text-[#000]/50 mb-5">Tidak ditemukan rute langsung maupun transfer dari <strong>${origin}</strong> ke <strong>${destination}</strong>.</p>
-        <button onclick="switchView('home')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#ffd731] border-2 border-[#000000] shadow-brutal-sm rounded-pill font-display text-xs font-bold hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i> <span data-i18n="btn_back">Kembali</span>
-        </button>
+        <h3 class="font-display text-lg font-bold text-[#000000] mb-2">${msg.title}</h3>
+        <p class="font-body text-sm text-[#000]/60 leading-relaxed mb-5 max-w-prose">${msg.body}</p>
+        ${backBtn}
       </div>`;
   } else {
-    if (direct.length > 0) {
-      html += `<div class="mb-2"><h3 class="font-display text-sm font-bold text-[#000]/40 uppercase tracking-wider">Rute Langsung</h3></div>`;
-      html += `<div id="results-direct" class="space-y-4"></div>`;
-    }
-    if (transfer.length > 0) {
-      html += `<div class="mt-6 mb-2"><h3 class="font-display text-sm font-bold text-[#000]/40 uppercase tracking-wider">Rute Transfer</h3></div>`;
-      html += `<div id="results-transfer" class="space-y-4"></div>`;
-    }
+    html += itineraries.map((it, i) => renderItinerary(it, i)).join("");
+    html += `<p class="font-body text-xs text-[#000]/45 leading-relaxed max-w-prose">Waktu dan jarak adalah perkiraan dari posisi halte, bukan dari kondisi lalu lintas. Angkot tidak punya jadwal tetap, jadi waktu tunggu bisa lebih lama.</p>`;
   }
 
   container.innerHTML = html;
-  appendResultCards(document.getElementById("results-direct"), direct, renderDirectCard, 0);
-  appendResultCards(document.getElementById("results-transfer"), transfer, renderTransferCard, 0);
   lucide.createIcons();
   applyLang(currentLang);
+  // Peta dibuat saat kartunya dibuka, supaya pilihan yang tidak dilihat tidak ikut memuat peta.
+  container.querySelectorAll("details.itinerary").forEach(card => {
+    const showMap = () => {
+      const el = card.querySelector(".itinerary-map");
+      if (!card.open || el.dataset.ready) return;
+      el.dataset.ready = "1";
+      renderItineraryMap(el, itineraries[Number(card.dataset.index)]);
+    };
+    card.addEventListener("toggle", showMap);
+    showMap();
+  });
 }
 
-// Kartu hasil dimuat per RESULTS_PAGE_SIZE. Tiap kartu membuat peta Leaflet dan
-// memanggil OSRM, jadi memuat puluhan sekaligus membuat halaman berat.
-const RESULTS_PAGE_SIZE = 5;
-
-function appendResultCards(listEl, items, renderCard, start) {
-  if (!listEl) return;
-  const oldBtn = listEl.querySelector(".results-more");
-  if (oldBtn) oldBtn.remove();
-
-  const batch = document.createElement("div");
-  batch.className = "space-y-4";
-  batch.innerHTML = items.slice(start, start + RESULTS_PAGE_SIZE).map(renderCard).join("");
-  listEl.appendChild(batch);
-
-  const next = start + RESULTS_PAGE_SIZE;
-  if (next < items.length) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "results-more w-full py-3 bg-white border-2 border-[#000000] shadow-brutal-sm rounded-pill font-display text-xs font-bold hover:bg-[#ffd731] transition-all";
-    btn.textContent = `Tampilkan ${Math.min(RESULTS_PAGE_SIZE, items.length - next)} rute lagi (sisa ${items.length - next})`;
-    btn.addEventListener("click", () => {
-      appendResultCards(listEl, items, renderCard, next);
-      lucide.createIcons();
-      applyLang(currentLang);
-    });
-    listEl.appendChild(btn);
-  }
-
-  batch.querySelectorAll(".route-map").forEach(el => { renderCardMap(el); });
-  batch.querySelectorAll(".route-map-multi").forEach(el => { renderTransferMap(el); });
-}
-function renderDirectCard(result) {
-  const { route, originStop, destStop, subWaypoints } = result;
+// Pelat nomor angkot dengan warna badannya: cara orang Medan mengenali angkot di jalan.
+function platHtml(route, size = "md") {
   const livery = getLiveryColor(route.warna);
-  const totalStops = subWaypoints.length;
-
-  return `
-    <div class="bg-white border-2 border-[#000000] shadow-brutal rounded-2xl overflow-hidden">
-      <div class="p-4 sm:p-6 pb-0">
-        <div class="flex items-start gap-3 sm:gap-4 mb-4">
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${livery.bg} ${livery.text} border-2 border-[#000000] font-display font-black text-base sm:text-lg flex items-center justify-center shadow-brutal-sm shrink-0">
-            ${route.nomor}
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="font-display text-sm font-bold text-[#000000]">Angkot ${route.nomor}</span>
-              <span class="text-[10px] font-display font-bold px-2 py-0.5 rounded-pill ${livery.bg} ${livery.text}">${livery.label}</span>
-            </div>
-            <p class="font-body text-xs text-[#000]/50">${route.operator} · ${totalStops} halte</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <div class="route-map w-full h-48 sm:h-56 border-2 border-[#000000] rounded-xl overflow-hidden mb-4" data-waypoints='${JSON.stringify(route.waypoints)}' data-origin="${originStop}" data-dest="${destStop}"></div>
-      </div>
-
-      <div class="px-4 sm:px-6 pb-5 sm:pb-6">
-        <div class="relative pl-[3.5rem]">
-
-          <!-- ORIGIN -->
-          <div class="relative pb-8">
-            <div class="absolute left-[-16px] top-[1px] w-8 h-8 rounded-full bg-[#55db9c] border-2 border-[#000000] z-10 shrink-0"></div>
-            <div class="absolute left-[-1px] top-[33px] w-[2px] h-[calc(100%-4px)] bg-[#000]/10"></div>
-            <div class="ml-7">
-              <p class="font-display text-[10px] font-bold text-[#55db9c] uppercase tracking-widest mb-1.5">Naik di sini</p>
-              <p class="font-display text-sm font-bold text-[#000000]">${originStop}</p>
-            </div>
-          </div>
-
-          <!-- JOURNEY -->
-          <div class="relative pb-8">
-            <div class="absolute left-[-16px] top-[1px] w-8 h-8 rounded-full border-2 border-[#000000] z-10 flex items-center justify-center shrink-0" style="background:${livery.hex}">
-              <span class="font-display font-black text-[8px] leading-none ${route.warna === 'kuning' ? 'text-[#000]' : 'text-white'}">${route.nomor}</span>
-            </div>
-            <div class="absolute left-[-1px] top-[33px] w-[2px] h-[calc(100%-4px)] bg-[#000]/10"></div>
-            <div class="ml-7">
-              <p class="font-body text-xs text-[#000]/70 mb-1.5">Naik <strong class="text-[#000000]">Angkot ${route.nomor}</strong> selama <strong class="text-[#000]">${totalStops} halte</strong></p>
-              <p class="font-body text-[11px] text-[#000]/50 leading-relaxed">
-                Langsung dari <strong class="text-[#000]">${originStop}</strong> ke <strong class="text-[#000]">${destStop}</strong> tanpa pindah.
-              </p>
-            </div>
-          </div>
-
-          <!-- DESTINATION -->
-          <div class="relative">
-            <div class="absolute left-[-16px] top-[1px] w-8 h-8 rounded-full bg-[#fb4903] border-2 border-[#000000] z-10 flex items-center justify-center shrink-0">
-              <i data-lucide="flag" class="w-3 h-3 text-white"></i>
-            </div>
-            <div class="ml-7">
-              <p class="font-display text-[10px] font-bold text-[#fb4903] uppercase tracking-widest mb-1">Turun di sini</p>
-              <p class="font-display text-sm font-bold text-[#000000]">${destStop}</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <button class="track-route-btn w-full py-3 bg-[#4da2ff] text-white font-display font-bold text-xs rounded-xl border-2 border-[#000000] shadow-brutal-sm hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all flex items-center justify-center gap-2" data-route='${JSON.stringify({ nomor: route.nomor, asal: originStop, tujuan: destStop, operator: route.operator, warna: route.warna, waypoints: route.waypoints })}'>
-          <i data-lucide="navigation" class="w-4 h-4"></i> <span data-i18n="btn_track">Lacak Rute Ini</span>
-        </button>
-      </div>
-    </div>
-  `;
+  const dims = size === "lg" ? "min-w-[3.25rem] h-12 text-base px-2" : "min-w-[2.25rem] h-8 text-xs px-1.5";
+  return `<span class="inline-flex items-center justify-center ${dims} rounded-lg ${livery.bg} ${livery.text} border-2 border-[#000000] font-display font-black shadow-brutal-sm shrink-0">${escapeHtml(route.nomor)}</span>`;
 }
 
-function renderTransferCard(result) {
-  const { leg1, leg2, transferStop } = result;
-  const l1 = getLiveryColor(leg1.route.warna);
-  const l2 = getLiveryColor(leg2.route.warna);
+function renderItinerary(it, index) {
+  const rides = it.legs.filter(l => l.type === "ride");
+  const transferLabel = it.transfers === 0 ? "Langsung, tanpa pindah" : `${it.transfers} kali pindah angkot`;
 
-  const leg1Stops = leg1.subWaypoints.length;
-  const leg2Stops = leg2.subWaypoints.length;
+  const plates = rides.map(l => platHtml(l.route, "lg"))
+    .join(`<i data-lucide="chevron-right" class="w-4 h-4 text-[#000]/40 shrink-0"></i>`);
 
-  function stopsPreview(stops, max) {
-    if (stops.length <= max) return stops.map(s => `<span class="text-[#000]/40">${s}</span>`).join(' → ');
-    const first = stops.slice(0, 2);
-    const last = stops.slice(-1);
-    return [...first, `<span class="text-[#000]/30 italic">...${stops.length - 3} halte lagi</span>`, ...last].map(s => typeof s === 'string' && s.includes('...') ? s : `<span class="text-[#000]/40">${s}</span>`).join(' → ');
-  }
+  const steps = it.legs.map((leg, i) => {
+    const isLast = i === it.legs.length - 1;
+    const line = isLast ? "" : `<div class="absolute left-[15px] top-9 bottom-0 w-[2px] bg-[#000]/10"></div>`;
 
+    if (leg.type === "walk") {
+      const target = isLast
+        ? `ke tujuan, <strong class="text-[#000]">${escapeHtml(leg.to.name)}</strong>`
+        : `ke halte <strong class="text-[#000]">${escapeHtml(leg.to.name)}</strong>`;
+      return `
+        <li class="relative pl-12 pb-6">
+          ${line}
+          <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-white border-2 border-[#000000] flex items-center justify-center">
+            <i data-lucide="footprints" class="w-4 h-4 text-[#000]"></i>
+          </div>
+          <p class="font-body text-sm text-[#000]/75 leading-relaxed pt-1">Jalan kaki sekitar <strong class="text-[#000]">${formatMeters(leg.meters)}</strong> ${target}.</p>
+          <p class="font-body text-xs text-[#000]/45 mt-0.5">Kira-kira ${leg.minutes} menit</p>
+        </li>`;
+    }
+
+    const livery = getLiveryColor(leg.route.warna);
+    const isTransfer = rides.indexOf(leg) > 0;
+    const passed = leg.stops.slice(1, -1);
+    const passedHtml = passed.length === 0 ? "" : `
+      <details class="mt-2">
+        <summary class="font-body text-xs text-[#4da2ff] font-semibold cursor-pointer">Lewat ${passed.length} halte</summary>
+        <ol class="mt-1.5 space-y-1 font-body text-xs text-[#000]/55 list-decimal list-inside">
+          ${passed.map(s => `<li>${escapeHtml(s.name)}</li>`).join("")}
+        </ol>
+      </details>`;
+    return `
+      <li class="relative pl-12 pb-6">
+        ${line}
+        <div class="absolute left-0 top-0 w-8 h-8 rounded-full border-2 border-[#000000] flex items-center justify-center" style="background:${livery.hex}">
+          <i data-lucide="bus-front" class="w-4 h-4 ${livery.text}"></i>
+        </div>
+        <p class="font-body text-xs font-semibold text-[#000]/45 pt-0.5">${isTransfer ? "Pindah angkot di" : "Naik di"} ${escapeHtml(leg.board.name)}</p>
+        <p class="font-body text-sm text-[#000]/75 leading-relaxed mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+          ${platHtml(leg.route)}
+          <span><strong class="text-[#000]">Angkot ${escapeHtml(leg.route.nomor)}</strong> warna ${escapeHtml(livery.label).toLowerCase()}, arah <strong class="text-[#000]">${escapeHtml(leg.towards)}</strong></span>
+        </p>
+        <p class="font-body text-sm text-[#000]/75 leading-relaxed mt-1.5">Turun di <strong class="text-[#000]">${escapeHtml(leg.alight.name)}</strong>, ${leg.stopCount === 1 ? "halte berikutnya" : `halte ke-${leg.stopCount} setelah naik`}.</p>
+        <p class="font-body text-xs text-[#000]/45 mt-0.5">${escapeHtml(leg.route.operator)}, sekitar ${formatMeters(leg.km * 1000)}, kira-kira ${formatMinutes(leg.minutes)}</p>
+        ${passedHtml}
+      </li>`;
+  }).join("");
+
+  // Pilihan tercepat langsung terbuka. Pilihan lain cukup ringkasannya; langkah dan petanya dibuka kalau diketuk.
   return `
-    <div class="bg-white border-2 border-[#000000] shadow-brutal rounded-2xl overflow-hidden">
-      <div class="p-4 sm:p-6 pb-0">
-        <div class="flex items-center gap-2 mb-4 flex-wrap">
-          <div class="px-3 py-1 rounded-lg ${l1.bg} ${l1.text} border-2 border-[#000000] font-display font-black text-xs">#${leg1.route.nomor}</div>
-          <i data-lucide="arrow-right" class="w-4 h-4 text-[#000]/40"></i>
-          <div class="px-3 py-1 rounded-lg ${l2.bg} ${l2.text} border-2 border-[#000000] font-display font-black text-xs">#${leg2.route.nomor}</div>
-          <span class="ml-auto text-[10px] font-display font-bold bg-[#ffd731] text-[#000000] px-2.5 py-1 rounded-pill border-2 border-[#000000] shadow-brutal-sm">${leg1Stops + leg2Stops} halte · 1x pindah</span>
+    <details class="itinerary bg-white border-2 border-[#000000] shadow-brutal rounded-2xl overflow-hidden" data-index="${index}" ${index === 0 ? "open" : ""}>
+      <summary class="p-4 sm:p-6 flex flex-wrap items-center gap-x-5 gap-y-3 cursor-pointer list-none">
+        <div class="flex items-center gap-2 flex-wrap">${plates}</div>
+        <div class="ml-auto text-right">
+          <p class="font-display text-xl sm:text-2xl font-black text-[#000000] leading-none">± ${formatMinutes(it.minutes)}</p>
+          <p class="font-body text-xs text-[#000]/55 mt-1">${transferLabel}${it.walkMeters > 0 ? `, jalan kaki ${formatMeters(it.walkMeters)}` : ""}</p>
         </div>
+        <p class="w-full flex items-center justify-between font-body text-xs font-semibold">
+          <span class="text-[#1a7f4f]">${index === 0 ? "Paling cepat dari semua pilihan" : ""}</span>
+          <span class="itinerary-toggle text-[#4da2ff]"></span>
+        </p>
+      </summary>
+
+      <div class="px-4 sm:px-6 pt-1 border-t-2 border-[#000000]/10"></div>
+      <div class="px-4 sm:px-6 pt-4">
+        <div class="itinerary-map w-full h-48 sm:h-56 border-2 border-[#000000] rounded-xl overflow-hidden" data-index="${index}"></div>
       </div>
+
+      <ol class="px-4 sm:px-6 pt-5">
+        ${steps}
+        <li class="relative pl-12 pb-5">
+          <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-[#fb4903] border-2 border-[#000000] flex items-center justify-center">
+            <i data-lucide="flag" class="w-4 h-4 text-white"></i>
+          </div>
+          <p class="font-display text-sm font-bold text-[#000000] pt-1.5">Sampai di ${escapeHtml(searchResults.to.name)}</p>
+        </li>
+      </ol>
 
       <div class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <div class="route-map-multi w-full h-44 sm:h-52 border-2 border-[#000000] rounded-xl overflow-hidden" 
-             data-waypoints='${JSON.stringify([...leg1.route.waypoints, ...leg2.route.waypoints])}' 
-             data-origin="${leg1.originStop}" 
-             data-dest="${leg2.destStop}"
-             data-transfer="${transferStop}"></div>
-      </div>
-
-      <div class="px-4 sm:px-6 pb-5 sm:pb-6">
-        <div class="flex gap-3">
-
-          <!-- Timeline Line -->
-          <div class="flex flex-col items-center shrink-0 w-7">
-            <div class="w-7 h-7 rounded-full bg-[#55db9c] border-2 border-[#000000] flex items-center justify-center shrink-0"></div>
-            <div class="w-[2px] flex-1 bg-[#000]/10"></div>
-          </div>
-
-          <!-- Origin Text -->
-          <div class="pb-6 pt-0.5">
-            <p class="font-display text-[10px] font-bold text-[#55db9c] uppercase tracking-widest mb-1">Naik di sini</p>
-            <p class="font-display text-sm font-bold text-[#000000]">${leg1.originStop}</p>
-          </div>
-
-        </div>
-
-        <div class="flex gap-3">
-
-          <div class="flex flex-col items-center shrink-0 w-7">
-            <div class="w-7 h-7 rounded-full border-2 border-[#000000] flex items-center justify-center shrink-0" style="background:${l1.hex}">
-              <span class="font-display font-black text-[7px] leading-none ${leg1.route.warna === 'kuning' ? 'text-[#000]' : 'text-white'}">${leg1.route.nomor}</span>
-            </div>
-            <div class="w-[2px] flex-1 bg-[#000]/10"></div>
-          </div>
-
-          <div class="pb-6 pt-0.5">
-            <p class="font-body text-xs text-[#000]/70 mb-1">Naik <strong class="text-[#000000]">Angkot ${leg1.route.nomor}</strong> <span class="text-[10px] px-1.5 py-0.5 rounded-pill ${l1.bg} ${l1.text} font-display font-bold">${l1.label}</span></p>
-            <p class="font-body text-[11px] text-[#000]/50 leading-relaxed mb-1.5">
-              Dari <strong class="text-[#000]">${leg1.originStop}</strong> → turun di <strong class="text-[#000]">${transferStop}</strong>
-            </p>
-            <div class="flex items-center gap-1 text-[10px] text-[#000]/35 font-body flex-wrap">
-              <i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i>
-              <span>${leg1Stops} halte · ${leg1.route.operator}</span>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="flex gap-3">
-
-          <div class="flex flex-col items-center shrink-0 w-7">
-            <div class="w-7 h-7 rounded-full bg-[#ffd731] border-2 border-[#000000] flex items-center justify-center shrink-0">
-              <i data-lucide="repeat" class="w-3 h-3 text-[#000000]"></i>
-            </div>
-            <div class="w-[2px] flex-1 bg-[#000]/10"></div>
-          </div>
-
-          <div class="pb-6 pt-0.5">
-            <p class="font-display text-[10px] font-bold text-[#ffd731] uppercase tracking-widest mb-1">Pindah Angkot</p>
-            <p class="font-display text-sm font-bold text-[#000000]">${transferStop}</p>
-            <p class="font-body text-[11px] text-[#000]/50 mt-1.5 leading-relaxed">Turun dari <strong>#${leg1.route.nomor}</strong>, jalan kaki sebentar, lalu naik <strong>#${leg2.route.nomor}</strong></p>
-          </div>
-
-        </div>
-
-        <div class="flex gap-3">
-
-          <div class="flex flex-col items-center shrink-0 w-7">
-            <div class="w-7 h-7 rounded-full border-2 border-[#000000] flex items-center justify-center shrink-0" style="background:${l2.hex}">
-              <span class="font-display font-black text-[7px] leading-none ${leg2.route.warna === 'kuning' ? 'text-[#000]' : 'text-white'}">${leg2.route.nomor}</span>
-            </div>
-            <div class="w-[2px] flex-1 bg-[#000]/10"></div>
-          </div>
-
-          <div class="pb-6 pt-0.5">
-            <p class="font-body text-xs text-[#000]/70 mb-1">Naik <strong class="text-[#000000]">Angkot ${leg2.route.nomor}</strong> <span class="text-[10px] px-1.5 py-0.5 rounded-pill ${l2.bg} ${l2.text} font-display font-bold">${l2.label}</span></p>
-            <p class="font-body text-[11px] text-[#000]/50 leading-relaxed mb-1.5">
-              Dari <strong class="text-[#000]">${transferStop}</strong> → turun di <strong class="text-[#000]">${leg2.destStop}</strong>
-            </p>
-            <div class="flex items-center gap-1 text-[10px] text-[#000]/35 font-body flex-wrap">
-              <i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i>
-              <span>${leg2Stops} halte · ${leg2.route.operator}</span>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="flex gap-3">
-
-          <div class="flex flex-col items-center shrink-0 w-7">
-            <div class="w-7 h-7 rounded-full bg-[#fb4903] border-2 border-[#000000] flex items-center justify-center shrink-0">
-              <i data-lucide="flag" class="w-2.5 h-2.5 text-white"></i>
-            </div>
-          </div>
-
-          <div class="pt-0.5">
-            <p class="font-display text-[10px] font-bold text-[#fb4903] uppercase tracking-widest mb-1">Turun di sini</p>
-            <p class="font-display text-sm font-bold text-[#000000]">${leg2.destStop}</p>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <div class="bg-[#f0f7ff] border border-[#000]/10 rounded-xl p-3 text-[11px] font-body text-[#000]/55 leading-relaxed flex items-start gap-2">
-          <i data-lucide="info" class="w-3.5 h-3.5 text-[#4da2ff] shrink-0 mt-0.5"></i>
-          <span>Perjalanan total <strong class="text-[#000]">${leg1Stops + leg2Stops} halte</strong> dengan 1x pindah angkot. Estimasi waktu ±15–25 menit (bergantung lalu lintas).</span>
-        </div>
-      </div>
-
-      <div class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <button class="track-route-btn w-full py-3 bg-[#4da2ff] text-white font-display font-bold text-xs rounded-xl border-2 border-[#000000] shadow-brutal-sm hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all flex items-center justify-center gap-2" data-route='${JSON.stringify({ nomor: leg1.route.nomor + "+" + leg2.route.nomor, asal: leg1.originStop, tujuan: leg2.destStop, operator: leg1.route.operator + " + " + leg2.route.operator, warna: leg1.route.warna, waypoints: [...leg1.route.waypoints, ...leg2.route.waypoints] })}'>
-          <i data-lucide="navigation" class="w-4 h-4"></i> <span data-i18n="btn_track">Lacak Rute Ini</span>
+        <button class="track-route-btn w-full py-3 bg-[#4da2ff] text-white font-display font-bold text-xs rounded-xl border-2 border-[#000000] shadow-brutal-sm hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all flex items-center justify-center gap-2" data-index="${index}">
+          <i data-lucide="navigation" class="w-4 h-4"></i> Pantau posisi saya di rute ini
         </button>
       </div>
-    </div>
-  `;
+    </details>`;
 }
 
-// ===== PETA DASAR =====
+// ===== PETA =====
 // Ubin OpenStreetMap. Atribusi wajib tampil sesuai ketentuan pemakaian OSM.
 function baseTiles() {
   return L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -1054,92 +827,57 @@ function baseTiles() {
   });
 }
 
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+// Gambar satu rute di peta: garis putus-putus untuk jalan kaki, garis tebal berwarna angkot untuk tiap angkot.
+function drawItinerary(map, it) {
+  const bounds = [];
+  it.legs.forEach(leg => {
+    if (leg.type === "walk") {
+      const coords = [leg.from.coord, leg.to.coord];
+      L.polyline(coords, { color: "#000000", weight: 3, opacity: 0.7, dashArray: "2 8" }).addTo(map);
+      bounds.push(...coords);
+      return;
+    }
+    const coords = leg.stops.map(s => s.coord);
+    const livery = getLiveryColor(leg.route.warna);
+    const outline = L.polyline(coords, { color: "#000000", weight: 8, opacity: 0.9 }).addTo(map);
+    const line = L.polyline(coords, { color: livery.hex, weight: 4, opacity: 1 }).addTo(map);
+    // Garis lurus antarhalte diganti garis yang mengikuti jalan begitu OSRM menjawab.
+    fetchRoadGeometry(coords).then(road => {
+      if (road.length > 2) { outline.setLatLngs(road); line.setLatLngs(road); }
+    }).catch(() => {});
+    L.circleMarker(leg.board.coord, { radius: 6, fillColor: "#ffffff", color: "#000000", weight: 2, fillOpacity: 1 })
+      .bindTooltip(`Naik ${leg.route.nomor}: ${leg.board.name}`).addTo(map);
+    L.circleMarker(leg.alight.coord, { radius: 6, fillColor: "#ffffff", color: "#000000", weight: 2, fillOpacity: 1 })
+      .bindTooltip(`Turun: ${leg.alight.name}`).addTo(map);
+    bounds.push(...coords);
+  });
+  const start = bounds[0], end = bounds[bounds.length - 1];
+  L.circleMarker(start, { radius: 8, fillColor: "#55db9c", color: "#000000", weight: 2, fillOpacity: 1 }).bindTooltip("Asal").addTo(map);
+  L.circleMarker(end, { radius: 8, fillColor: "#fb4903", color: "#000000", weight: 2, fillOpacity: 1 }).bindTooltip("Tujuan").addTo(map);
+  return L.latLngBounds(bounds);
 }
 
-async function renderCardMap(el) {
-  const waypoints = JSON.parse(el.dataset.waypoints || "[]");
-  const origin = el.dataset.origin;
-  const dest = el.dataset.dest;
-  const coords = waypoints.map(w => getStopCoords(w)).filter(Boolean);
-  
-  if (coords.length < 2) {
-    el.innerHTML = '<div class="flex items-center justify-center h-full text-xs text-[#000]/40 font-body">Peta tidak tersedia</div>';
-    return;
-  }
-
-  // Wajib pastikan elemen card map punya tinggi CSS eksplisit
-  el.style.height = "220px"; 
-
-  const map = L.map(el, { zoomControl: true, attributionControl: true, dragging: true, scrollWheelZoom: true });
+function renderItineraryMap(el, it) {
+  const map = L.map(el, { zoomControl: true, attributionControl: true, scrollWheelZoom: false });
   baseTiles().addTo(map);
-
-  const straightLine = L.polyline(coords, { color: '#000000', weight: 4, opacity: 0.8 }).addTo(map);
-  
-  const oCoord = getStopCoords(origin);
-  const dCoord = getStopCoords(dest);
-  if (oCoord) L.circleMarker(oCoord, { radius: 7, fillColor: '#55db9c', color: '#000000', weight: 2, fillOpacity: 1 }).addTo(map);
-  if (dCoord) L.circleMarker(dCoord, { radius: 7, fillColor: '#fb4903', color: '#000000', weight: 2, fillOpacity: 1 }).addTo(map);
-
-  map.fitBounds(L.latLngBounds(coords), { padding: [30, 30] });
-
+  const bounds = drawItinerary(map, it);
+  map.fitBounds(bounds, { padding: [30, 30] });
   // Peta dibuat saat tampilan hasil masih tersembunyi, jadi ukuran dan batasnya dihitung ulang setelah tampil.
   setTimeout(() => {
     map.invalidateSize();
-    map.fitBounds(L.latLngBounds(coords), { padding: [30, 30] });
+    map.fitBounds(bounds, { padding: [30, 30] });
   }, 300);
-
-  // Upgrade dengan OSRM road snapping jika ada jaringan
-  upgradeToRoadGeometry(map, straightLine, coords);
-}
-
-async function renderTransferMap(el) {
-  const waypoints = JSON.parse(el.dataset.waypoints || "[]");
-  const origin = el.dataset.origin;
-  const dest = el.dataset.dest;
-  const transfer = el.dataset.transfer;
-  const coords = waypoints.map(w => getStopCoords(w)).filter(Boolean);
-  
-  if (coords.length < 2) {
-    el.innerHTML = '<div class="flex items-center justify-center h-full text-xs text-[#000]/40 font-body">Peta tidak tersedia</div>';
-    return;
-  }
-
-  el.style.height = "220px";
-
-  const map = L.map(el, { zoomControl: true, attributionControl: true, dragging: true, scrollWheelZoom: true });
-  baseTiles().addTo(map);
-
-  const straightLine = L.polyline(coords, { color: '#000000', weight: 4, opacity: 0.8 }).addTo(map);
-  
-  const oCoord = getStopCoords(origin);
-  const dCoord = getStopCoords(dest);
-  const tCoord = getStopCoords(transfer);
-  if (oCoord) L.circleMarker(oCoord, { radius: 7, fillColor: '#55db9c', color: '#000000', weight: 2, fillOpacity: 1 }).addTo(map);
-  if (dCoord) L.circleMarker(dCoord, { radius: 7, fillColor: '#fb4903', color: '#000000', weight: 2, fillOpacity: 1 }).addTo(map);
-  if (tCoord) L.circleMarker(tCoord, { radius: 9, fillColor: '#ffd731', color: '#000000', weight: 2, fillOpacity: 1 }).addTo(map);
-
-  map.fitBounds(L.latLngBounds(coords), { padding: [30, 30] });
-  el._leaflet_map = map;
-
-  // Peta dibuat saat tampilan hasil masih tersembunyi, jadi batasnya dihitung ulang setelah tampil.
-  setTimeout(() => {
-    map.invalidateSize();
-    map.fitBounds(L.latLngBounds(coords), { padding: [30, 30] });
-  }, 300);
-  upgradeToRoadGeometry(map, straightLine, coords);
 }
 
 function renderPopularRoutes() {
   const container = document.getElementById("popular-routes");
-  if (!container || typeof POPULAR_ROUTES === 'undefined') return;
-  
+  if (!container) return;
+
   container.innerHTML = POPULAR_ROUTES.map(r => `
-    <button type="button" class="popular-btn bg-white border-2 border-[#000000] shadow-brutal-sm p-3.5 text-left rounded-xl hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all flex items-center justify-between group" data-from="${r.from}" data-to="${r.to}">
+    <button type="button" class="popular-btn bg-white border-2 border-[#000000] shadow-brutal-sm p-3.5 text-left rounded-xl hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all flex items-center justify-between group" data-from="${escapeHtml(r.from)}" data-to="${escapeHtml(r.to)}">
       <div class="min-w-0 pr-2">
-        <p class="font-body text-xs font-bold text-[#000000] truncate">${r.from}</p>
-        <p class="font-body text-[11px] text-[#000]/40 truncate mt-0.5">&rarr; ${r.to}</p>
+        <p class="font-body text-xs font-bold text-[#000000] truncate">${escapeHtml(r.from)}</p>
+        <p class="font-body text-[11px] text-[#000]/40 truncate mt-0.5">ke ${escapeHtml(r.to)}</p>
       </div>
       <div class="w-7 h-7 bg-[#ffd731]/20 border border-[#000000]/20 rounded-full flex items-center justify-center shrink-0 group-hover:bg-[#ffd731] group-hover:border-[#000000] transition-colors">
         <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-[#000000]"></i>
@@ -1151,52 +889,65 @@ function renderPopularRoutes() {
     btn.addEventListener("click", () => {
       document.getElementById("origin-input").value = btn.dataset.from;
       document.getElementById("dest-input").value = btn.dataset.to;
-      document.getElementById("origin-resolved").value = btn.dataset.from;
-      document.getElementById("dest-resolved").value = btn.dataset.to;
+      document.getElementById("origin-resolved").value = "";
+      document.getElementById("dest-resolved").value = "";
       performSearch();
     });
   });
   lucide.createIcons();
 }
 
+// Saran saat mengetik: halte angkot dan tempat umum (mal, kampus, rumah sakit) dari server.
 function setupSuggestions(inputEl, hiddenEl, listEl) {
   if (!inputEl) return;
+  let timer = null;
+  let lastQuery = "";
+
+  const close = () => listEl.classList.add("hidden");
+
   inputEl.addEventListener("input", () => {
     const val = inputEl.value.trim();
     hiddenEl.value = "";
-    if (val.length < 1 || typeof ALL_STOPS === 'undefined') {
-      listEl.classList.add("hidden");
-      return;
-    }
-    const typed = normalize(val);
-    const matches = ALL_STOPS.filter(s => normalize(s).includes(typed) || stopsMatch(val, s)).slice(0, 6);
-    if (matches.length === 0) {
-      listEl.classList.add("hidden");
-      return;
-    }
-    listEl.innerHTML = matches.map(m => `
-      <div class="sugg-item px-4 py-2.5 text-xs font-body hover:bg-[#4da2ff]/10 cursor-pointer border-b border-[#000]/5 last:border-0 font-medium flex items-center gap-2" data-value="${escapeHtml(m)}">
-        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#4da2ff] shrink-0"></i>
-        <span class="truncate">${escapeHtml(m)}</span>
-      </div>
-    `).join("");
-    listEl.classList.remove("hidden");
-    lucide.createIcons({ nodes: listEl.querySelectorAll("[data-lucide]") });
+    clearTimeout(timer);
+    if (val.length < 2) { close(); return; }
 
-    listEl.querySelectorAll(".sugg-item").forEach(item => {
-      item.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        inputEl.value = item.dataset.value;
-        hiddenEl.value = item.dataset.value;
-        listEl.classList.add("hidden");
+    timer = setTimeout(async () => {
+      lastQuery = val;
+      let places = [];
+      try {
+        const res = await fetch(`/api/places?q=${encodeURIComponent(val)}`);
+        if (res.ok) places = await res.json();
+      } catch { /* tanpa saran, teks tetap bisa dicari */ }
+      // Jawaban untuk ketikan lama diabaikan.
+      if (lastQuery !== inputEl.value.trim()) return;
+      if (places.length === 0) { close(); return; }
+
+      listEl.innerHTML = places.map((p, i) => `
+        <button type="button" class="sugg-item w-full text-left px-4 py-2.5 font-body hover:bg-[#4da2ff]/10 focus:bg-[#4da2ff]/10 focus:outline-none border-b border-[#000]/5 last:border-0 flex items-center gap-2.5" data-index="${i}">
+          <i data-lucide="${p.type === "halte" ? "bus-front" : "map-pin"}" class="w-4 h-4 ${p.type === "halte" ? "text-[#000]" : "text-[#4da2ff]"} shrink-0"></i>
+          <span class="min-w-0">
+            <span class="block text-xs font-semibold text-[#000] truncate">${escapeHtml(p.name)}</span>
+            <span class="block text-[11px] text-[#000]/45 truncate">${escapeHtml(p.detail)}</span>
+          </span>
+        </button>
+      `).join("");
+      listEl.classList.remove("hidden");
+      lucide.createIcons({ nodes: listEl.querySelectorAll("[data-lucide]") });
+
+      listEl.querySelectorAll(".sugg-item").forEach(item => {
+        // mousedown, bukan click: input kehilangan fokus lebih dulu dan daftar keburu tertutup.
+        item.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          setPoint(inputEl, hiddenEl, places[Number(item.dataset.index)]);
+          close();
+        });
       });
-    });
+    }, 220);
   });
 
+  inputEl.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
   document.addEventListener("click", (e) => {
-    if (!inputEl.contains(e.target) && !listEl.contains(e.target)) {
-      listEl.classList.add("hidden");
-    }
+    if (!inputEl.contains(e.target) && !listEl.contains(e.target)) close();
   });
 }
 
@@ -1395,12 +1146,13 @@ let trackingWatchId = null;
 let trackingUserMarker = null;
 let trackingFollowMode = true;
 
-function startTracking(routeData) {
+// Pantau posisi sendiri di atas rute yang dipilih, supaya tahu kapan harus turun.
+function startTracking(itinerary) {
   switchView("tracking");
-  setTimeout(() => initTrackingMap(routeData), 200);
+  setTimeout(() => initTrackingMap(itinerary), 200);
 }
 
-function initTrackingMap(routeData) {
+function initTrackingMap(itinerary) {
   const mapEl = document.getElementById("tracking-map");
   if (!mapEl) return;
   if (trackingMap) { trackingMap.remove(); trackingMap = null; }
@@ -1408,30 +1160,13 @@ function initTrackingMap(routeData) {
   trackingMap = L.map(mapEl, { zoomControl: false, attributionControl: true }).setView([3.5950, 98.6700], 13);
   baseTiles().addTo(trackingMap);
 
+  const rides = itinerary.legs.filter(l => l.type === "ride");
   const nameEl = document.getElementById("tracking-route-name");
   const infoEl = document.getElementById("tracking-route-info");
-  if (nameEl) nameEl.textContent = `Angkot #${routeData.nomor} — ${routeData.asal || routeData.tujuan ? routeData.asal + ' → ' + routeData.tujuan : ''}`;
-  if (infoEl) infoEl.textContent = `${routeData.operator || 'Trayek Medan'} · ${routeData.waypoints.length} halte`;
+  if (nameEl) nameEl.textContent = rides.map(l => `Angkot ${l.route.nomor}`).join(", lalu ");
+  if (infoEl) infoEl.textContent = `Turun terakhir di ${rides[rides.length - 1].alight.name}`;
 
-  const allCoords = routeData.waypoints.map(w => getStopCoords(w)).filter(Boolean);
-  if (allCoords.length >= 2) {
-    const livery = getLiveryColor(routeData.warna);
-    const routeColor = livery.hex === '#FFFFFF' ? '#000000' : livery.hex;
-    
-    L.polyline(allCoords, { color: 'white', weight: 6, opacity: 0.9 }).addTo(trackingMap);
-    const mainLine = L.polyline(allCoords, { color: routeColor, weight: 4, opacity: 0.9, dashArray: '8 6' }).addTo(trackingMap);
-    
-    allCoords.forEach((coord, i) => {
-      const isFirst = i === 0;
-      const isLast = i === allCoords.length - 1;
-      if (isFirst || isLast) {
-        L.circleMarker(coord, { radius: 6, color: '#000', fillColor: isFirst ? '#55db9c' : '#fb4903', fillOpacity: 1, weight: 2 }).addTo(trackingMap);
-      }
-    });
-
-    trackingMap.fitBounds(mainLine.getBounds(), { padding: [50, 50] });
-  }
-
+  trackingMap.fitBounds(drawItinerary(trackingMap, itinerary), { padding: [50, 50] });
   startGPSWatch();
 }
 
@@ -1486,13 +1221,19 @@ function stopTracking() {
   switchView("home");
 }
 
-function initApp() {
+async function initApp() {
   lucide.createIcons();
+  try {
+    await loadData();
+  } catch {
+    showSearchError("Data trayek tidak bisa dimuat. Periksa koneksi internet, lalu muat ulang halaman.");
+  }
+  document.dispatchEvent(new Event("angkot:data"));
   renderPopularRoutes();
 
-  // Angka di hero diambil dari data, supaya tidak tertinggal saat data.js berubah.
+  // Angka di hero diambil dari data, supaya tidak tertinggal saat data berubah.
   const heroStops = document.getElementById("hero-stops-count");
-  if (heroStops && typeof ALL_STOPS !== "undefined") heroStops.textContent = ALL_STOPS.length;
+  if (heroStops && ALL_STOPS.length > 0) heroStops.textContent = ALL_STOPS.length;
 
   applyLang(currentLang);
 
@@ -1540,7 +1281,7 @@ function initApp() {
   if (geolocBtn) {
     geolocBtn.addEventListener("click", () => {
       if (!navigator.geolocation) {
-        alert("GPS tidak didukung browser ini.");
+        showSearchError("Browser ini tidak mendukung GPS. Ketik nama tempat asalmu.");
         return;
       }
       geolocBtn.classList.add("animate-pulse");
@@ -1548,51 +1289,26 @@ function initApp() {
       navigator.geolocation.getCurrentPosition((pos) => {
         geolocBtn.classList.remove("animate-pulse");
         geolocBtn.disabled = false;
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const accuracy = pos.coords.accuracy;
-        let best = null, bestDist = Infinity;
-        if (typeof STOP_COORDS !== 'undefined') {
-          for (const [name, coords] of Object.entries(STOP_COORDS)) {
-            const dLat = (lat - coords[0]) * 111;
-            const dLng = (lng - coords[1]) * 111 * Math.cos(lat * Math.PI / 180);
-            const d = Math.sqrt(dLat * dLat + dLng * dLng);
-            if (d < bestDist) { bestDist = d; best = name; }
-          }
-        }
-        if (best && bestDist < 5) {
-          document.getElementById("origin-input").value = best;
-          document.getElementById("origin-resolved").value = best;
-          if (typeof showToast === "function") {
-            showToast(`Lokasi ditemukan: ${best} (${accuracy.toFixed(0)}m akurasi)`, "success");
-          }
-        } else if (best) {
-          document.getElementById("origin-input").value = best;
-          document.getElementById("origin-resolved").value = best;
-          if (typeof showToast === "function") {
-            showToast(`Lokasi terdekat: ${best} (${bestDist.toFixed(1)}km)`, "info");
-          }
-        } else {
-          document.getElementById("origin-input").value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-          document.getElementById("origin-resolved").value = "";
-        }
+        // Posisi GPS dipakai apa adanya; server yang mencari halte terdekat dan jarak jalan kakinya.
+        setPoint(document.getElementById("origin-input"), document.getElementById("origin-resolved"),
+          { name: "Lokasi saya", lat: pos.coords.latitude, lng: pos.coords.longitude });
+        showSearchError("");
       }, (err) => {
         geolocBtn.classList.remove("animate-pulse");
         geolocBtn.disabled = false;
-        let msg = "Gagal mengambil lokasi GPS.";
-        if (err.code === 1) msg = "Akses lokasi ditolak. Aktifkan izin lokasi di browser.";
-        else if (err.code === 2) msg = "Lokasi tidak tersedia. Coba di luar ruangan.";
-        else if (err.code === 3) msg = "Timeout GPS. Coba lagi.";
-        alert(msg);
+        let msg = "Lokasi tidak bisa diambil. Ketik nama tempat asalmu.";
+        if (err.code === 1) msg = "Izin lokasi ditolak. Izinkan lokasi di pengaturan browser, atau ketik nama tempat asalmu.";
+        else if (err.code === 2) msg = "Sinyal GPS tidak dapat. Coba di tempat terbuka, atau ketik nama tempat asalmu.";
+        else if (err.code === 3) msg = "GPS terlalu lama merespons. Tekan lagi, atau ketik nama tempat asalmu.";
+        showSearchError(msg);
       }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
     });
   }
 
   document.addEventListener("click", (e) => {
     const trackBtn = e.target.closest(".track-route-btn");
-    if (trackBtn) {
-      const routeData = JSON.parse(trackBtn.dataset.route || "{}");
-      startTracking(routeData);
+    if (trackBtn && searchResults) {
+      startTracking(searchResults.itineraries[Number(trackBtn.dataset.index)]);
     }
   });
 
@@ -1630,9 +1346,7 @@ function initApp() {
   const qDest = urlParams.get('dest');
   if (qOrigin && qDest) {
     document.getElementById("origin-input").value = qOrigin;
-    document.getElementById("origin-resolved").value = qOrigin;
     document.getElementById("dest-input").value = qDest;
-    document.getElementById("dest-resolved").value = qDest;
     performSearch();
   }
 
