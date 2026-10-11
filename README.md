@@ -4,6 +4,8 @@ Web pencari rute angkot di Kota Medan. Ketik tempat asal dan tujuan, lalu situs 
 
 Situs: https://angkotmedan.vercel.app
 
+![Beranda AngkotMedan: papan hijau berisi kolom asal dan tujuan](docs/screenshots/beranda.png)
+
 Proyek ini dibuat untuk orang yang baru datang ke Medan. Informasi trayek angkot tidak terkumpul di satu tempat, jadi pendatang biasanya harus bertanya ke orang di jalan. Situs ini bukan layanan resmi Dishub Kota Medan.
 
 ## Alur pemakaian
@@ -12,6 +14,17 @@ Proyek ini dibuat untuk orang yang baru datang ke Medan. Informasi trayek angkot
 2. Server mencari halte dalam jarak 1 km dari kedua tempat itu, lalu mencari rangkaian angkot tercepat di antaranya, paling banyak dua kali pindah.
 3. Hasil tampil sebagai beberapa pilihan, yang tercepat di atas. Di bagian atas tiap pilihan ada pelat nomor angkot dengan warna badannya, berurutan sesuai urutan naik, lalu perkiraan lama perjalanan dan jarak jalan kakinya. Di bawahnya ada langkah-langkahnya. Untuk tiap angkot disebutkan arahnya, yaitu nama ujung trayek yang biasa tertulis di kaca depan. Peta menggambar tiap angkot dengan warnanya sendiri dan jalan kaki dengan garis putus-putus.
 4. Tombol "Pantau posisi saya di rute ini" menampilkan posisi GPS di atas rute, supaya tahu kapan harus turun.
+
+![Hasil pencarian dari USU ke Istana Maimun: pelat nomor angkot, peta, dan langkah-langkahnya](docs/screenshots/hasil.png)
+
+Di HP, hasil yang sama tampil satu kolom. Daftar semua trayek ada di halaman tersendiri.
+
+<p>
+  <img src="docs/screenshots/hasil-hp.png" alt="Hasil pencarian di layar HP" width="280">
+  <img src="docs/screenshots/beranda-hp.png" alt="Beranda di layar HP" width="280">
+</p>
+
+![Daftar semua trayek dengan saringan warna](docs/screenshots/trayek.png)
 
 Kalau tidak ada rute, situs menjelaskan sebabnya: tempat tidak dikenali, tidak ada halte dalam 1 km (beserta halte terdekat), atau asal dan tujuan cukup dekat untuk jalan kaki.
 
@@ -30,12 +43,17 @@ server/index.js     menyalakan server (lokal dan Docker)
 api/index.js        pintu masuk untuk Vercel
 data/               trayek, koordinat halte, rute populer
 public/             halaman web: HTML, CSS, JavaScript, gambar
+docs/screenshots/   tangkapan layar untuk README
 test/               tes mesin pencari rute
 Dockerfile          image untuk hosting berbasis container
 vercel.json         pengaturan Vercel
 ```
 
-Halaman memakai HTML, Tailwind CSS lewat CDN, dan JavaScript tanpa framework. Peta memakai Leaflet dengan ubin OpenStreetMap.
+Halaman ditulis dengan HTML, satu berkas CSS, dan JavaScript tanpa framework, jadi tidak ada langkah build. Peta memakai Leaflet dengan ubin OpenStreetMap, dan ikon dari Lucide.
+
+## Tampilan
+
+Tampilannya meminjam dari benda yang memang ada di jalan. Kolom pencarian berbentuk papan penunjuk arah hijau. Tiap angkot digambar sebagai pelat nomor dengan warna badannya, dan angkot dua warna pelatnya terbelah miring. Hurufnya Barlow, yang diturunkan dari huruf rambu jalan. Catatan lengkapnya ada di `DESIGN.md`.
 
 ## Menjalankan di komputer sendiri
 
@@ -170,4 +188,3 @@ Di luar soal data:
 - Tarif belum ditampilkan.
 - Pencarian tempat umum memakai Photon, layanan publik berbasis OpenStreetMap. Kalau layanan itu lambat atau mati, saran yang muncul hanya nama halte.
 - Garis rute di peta memakai server demo publik OSRM. Kalau server itu tidak menjawab, garisnya lurus antarhalte.
-- Tailwind dimuat dari CDN, jadi browser menampilkan peringatan di konsol.
