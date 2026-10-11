@@ -449,21 +449,35 @@ function applyLang(lang) {
   if (langLabel) langLabel.textContent = lang.toUpperCase();
 }
 
+// Singkatan yang dipakai di data trayek, disamakan dulu supaya "Terminal Amplas" cocok dengan "T. Amplas".
+const STOP_ABBREVIATIONS = { t: "terminal", simp: "simpang", jl: "jalan", psr: "pasar", rsu: "rs", rsup: "rs" };
+
 function normalize(str) {
   if (!str) return "";
-  return str.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+  return str.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean)
+    .map(w => STOP_ABBREVIATIONS[w] || w).join(" ");
 }
 
 function stopsMatch(input, stop) {
   const ni = normalize(input);
   const ns = normalize(stop);
-  if (ns.includes(ni) || ni.includes(ns)) return true;
-  const inputWords = ni.split(/\s+/).filter(Boolean);
-  const stopWords = ns.split(/\s+/).filter(Boolean);
-  if (inputWords.length === 1 && inputWords[0].length >= 3) {
-    return stopWords.some(sw => sw.startsWith(inputWords[0]) || inputWords[0].startsWith(sw));
+  if (!ni || !ns) return false;
+  if (ni === ns) return true;
+  // Salah satu nama memuat nama lainnya secara utuh per kata ("Amplas" di dalam "Terminal Amplas").
+  if (ni.length >= 3 && ns.length >= 3 && (` ${ns} `.includes(` ${ni} `) || ` ${ni} `.includes(` ${ns} `))) return true;
+
+  const inputWords = ni.split(" ");
+  const stopWords = ns.split(" ");
+  const longStopWords = stopWords.filter(w => w.length >= 3);
+  if (inputWords.length === 1) {
+    if (ni.length < 3) return false;
+    return longStopWords.some(sw => sw.startsWith(ni) || ni.startsWith(sw));
   }
-  return inputWords.every(iw => stopWords.some(sw => sw.includes(iw) || iw.includes(sw)));
+  // Kata pendek (angka romawi, huruf seperti "B" pada "Simalingkar B") harus sama persis.
+  // Kalau dicocokkan longgar, "Belawan" ikut cocok dengan semua halte yang punya kata "B".
+  return inputWords.every(iw => iw.length < 3
+    ? stopWords.includes(iw)
+    : longStopWords.some(sw => sw.includes(iw) || iw.includes(sw)));
 }
 
 function getStopCoords(stopName) {
@@ -474,7 +488,7 @@ function getStopCoords(stopName) {
     if (normalize(name) === normalized) return coords;
   }
   for (const [name, coords] of Object.entries(STOP_COORDS)) {
-    if (normalize(name).includes(normalized) || normalized.includes(normalize(name))) return coords;
+    if (stopsMatch(stopName, name)) return coords;
   }
   return null;
 }
@@ -484,9 +498,6 @@ function findStop(input) {
   const normalized = normalize(input);
   for (const stop of ALL_STOPS) {
     if (normalize(stop) === normalized) return stop;
-  }
-  for (const stop of ALL_STOPS) {
-    if (normalize(stop).includes(normalized) || normalized.includes(normalize(stop))) return stop;
   }
   for (const stop of ALL_STOPS) {
     if (stopsMatch(input, stop)) return stop;
@@ -522,8 +533,8 @@ function findDirectRoutes(origin, destination) {
     const di = stopIndexInRoute(route, destination);
     if (oi !== -1 && di !== -1 && oi !== di) {
       const forward = oi < di;
-      const isBackward = route.pp ? !forward : false;
-      if (!route.pp || forward || isBackward) {
+      // Trayek satu arah (pp: false) hanya bisa dinaiki searah urutan haltenya.
+      if (forward || route.pp) {
         const start = Math.min(oi, di);
         const end = Math.max(oi, di);
         const subWaypoints = route.waypoints.slice(start, end + 1);
@@ -544,38 +555,43 @@ function findTransferRoutes(origin, destination) {
   const originRoutes = ANGKOT_ROUTES.filter(r => stopIndexInRoute(r, origin) !== -1);
   const destRoutes = ANGKOT_ROUTES.filter(r => stopIndexInRoute(r, destination) !== -1);
 
+  // Bisa ditempuh dari indeks a ke b? Trayek satu arah hanya maju.
+  const reachable = (route, a, b) => a !== b && (a < b || route.pp);
+  const segment = (route, a, b) => {
+    const sub = route.waypoints.slice(Math.min(a, b), Math.max(a, b) + 1);
+    return a > b ? sub.reverse() : sub;
+  };
+
   originRoutes.forEach(r1 => {
+    const oIdx = stopIndexInRoute(r1, origin);
+    // Kalau r1 sendiri sampai ke tujuan, itu sudah muncul sebagai rute langsung.
+    const r1Dest = stopIndexInRoute(r1, destination);
+    if (r1Dest !== -1 && reachable(r1, oIdx, r1Dest)) return;
+
     destRoutes.forEach(r2 => {
       if (r1.id === r2.id) return;
-      const r1Stops = new Set(r1.waypoints.map(w => normalize(w)));
-      for (const wp of r2.waypoints) {
-        if (r1Stops.has(normalize(wp))) {
-          const oIdx = stopIndexInRoute(r1, origin);
-          const tIdx = stopIndexInRoute(r1, wp);
-          const dIdx = stopIndexInRoute(r2, destination);
-          const tIdx2 = stopIndexInRoute(r2, wp);
-          if (oIdx === -1 || tIdx === -1 || dIdx === -1 || tIdx2 === -1) continue;
-          const seg1Start = Math.min(oIdx, tIdx);
-          const seg1End = Math.max(oIdx, tIdx);
-          let sub1 = r1.waypoints.slice(seg1Start, seg1End + 1);
-          if (oIdx > tIdx && r1.pp) sub1.reverse();
-          else if (oIdx > tIdx && !r1.pp) continue;
+      const dIdx = stopIndexInRoute(r2, destination);
+      const r2Origin = stopIndexInRoute(r2, origin);
+      if (r2Origin !== -1 && reachable(r2, r2Origin, dIdx)) return;
 
-          const seg2Start = Math.min(tIdx2, dIdx);
-          const seg2End = Math.max(tIdx2, dIdx);
-          let sub2 = r2.waypoints.slice(seg2Start, seg2End + 1);
-          if (tIdx2 > dIdx && r2.pp) sub2.reverse();
-          else if (tIdx2 > dIdx && !r2.pp) continue;
-
-          results.push({
+      // Dari semua halte yang dilewati kedua trayek, pilih titik pindah dengan halte paling sedikit.
+      let best = null;
+      r2.waypoints.forEach((wp, tIdx2) => {
+        const tIdx = r1.waypoints.findIndex(w => normalize(w) === normalize(wp));
+        if (tIdx === -1) return;
+        if (!reachable(r1, oIdx, tIdx) || !reachable(r2, tIdx2, dIdx)) return;
+        const sub1 = segment(r1, oIdx, tIdx);
+        const sub2 = segment(r2, tIdx2, dIdx);
+        if (!best || sub1.length + sub2.length < best.leg1.subWaypoints.length + best.leg2.subWaypoints.length) {
+          best = {
             leg1: { route: r1, originStop: r1.waypoints[oIdx], destStop: wp, subWaypoints: sub1 },
             leg2: { route: r2, originStop: wp, destStop: r2.waypoints[dIdx], subWaypoints: sub2 },
             transferStop: wp,
             transferCount: 1
-          });
-          break;
+          };
         }
-      }
+      });
+      if (best) results.push(best);
     });
   });
 
@@ -728,16 +744,18 @@ function renderResults() {
     return; 
   }
 
-  const { origin, destination, direct, transfer } = searchResults;
+  const { direct, transfer } = searchResults;
+  const origin = escapeHtml(searchResults.origin);
+  const destination = escapeHtml(searchResults.destination);
   const totalCount = direct.length + transfer.length;
   let html = "";
 
   html += `
     <div class="mb-6 bg-white border-2 border-[#000000] shadow-brutal p-5 rounded-2xl">
-      <div class="flex items-center gap-3 mb-2">
+      ${totalCount > 0 ? `<div class="flex items-center gap-3 mb-2">
         <h2 class="font-display text-2xl font-bold text-[#000000]" data-i18n="result_title">Rute Ditemukan</h2>
         <span class="px-3 py-0.5 rounded-pill text-xs font-bold bg-[#ffd731] border-2 border-[#000000] shadow-brutal-sm">${totalCount} rute</span>
-      </div>
+      </div>` : ""}
       <p class="font-body text-sm text-[#000]/60">
         <span class="font-bold text-[#000000]">${origin}</span> 
         <i data-lucide="arrow-right" class="w-3.5 h-3.5 inline mx-1"></i> 
@@ -761,20 +779,51 @@ function renderResults() {
   } else {
     if (direct.length > 0) {
       html += `<div class="mb-2"><h3 class="font-display text-sm font-bold text-[#000]/40 uppercase tracking-wider">Rute Langsung</h3></div>`;
-      direct.forEach(r => { html += renderDirectCard(r); });
+      html += `<div id="results-direct" class="space-y-4"></div>`;
     }
     if (transfer.length > 0) {
       html += `<div class="mt-6 mb-2"><h3 class="font-display text-sm font-bold text-[#000]/40 uppercase tracking-wider">Rute Transfer</h3></div>`;
-      transfer.forEach(r => { html += renderTransferCard(r); });
+      html += `<div id="results-transfer" class="space-y-4"></div>`;
     }
   }
 
   container.innerHTML = html;
+  appendResultCards(document.getElementById("results-direct"), direct, renderDirectCard, 0);
+  appendResultCards(document.getElementById("results-transfer"), transfer, renderTransferCard, 0);
   lucide.createIcons();
   applyLang(currentLang);
+}
 
-  container.querySelectorAll(".route-map").forEach(el => { renderCardMap(el); });
-  container.querySelectorAll(".route-map-multi").forEach(el => { renderTransferMap(el); });
+// Kartu hasil dimuat per RESULTS_PAGE_SIZE. Tiap kartu membuat peta Leaflet dan
+// memanggil OSRM, jadi memuat puluhan sekaligus membuat halaman berat.
+const RESULTS_PAGE_SIZE = 5;
+
+function appendResultCards(listEl, items, renderCard, start) {
+  if (!listEl) return;
+  const oldBtn = listEl.querySelector(".results-more");
+  if (oldBtn) oldBtn.remove();
+
+  const batch = document.createElement("div");
+  batch.className = "space-y-4";
+  batch.innerHTML = items.slice(start, start + RESULTS_PAGE_SIZE).map(renderCard).join("");
+  listEl.appendChild(batch);
+
+  const next = start + RESULTS_PAGE_SIZE;
+  if (next < items.length) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "results-more w-full py-3 bg-white border-2 border-[#000000] shadow-brutal-sm rounded-pill font-display text-xs font-bold hover:bg-[#ffd731] transition-all";
+    btn.textContent = `Tampilkan ${Math.min(RESULTS_PAGE_SIZE, items.length - next)} rute lagi (sisa ${items.length - next})`;
+    btn.addEventListener("click", () => {
+      appendResultCards(listEl, items, renderCard, next);
+      lucide.createIcons();
+      applyLang(currentLang);
+    });
+    listEl.appendChild(btn);
+  }
+
+  batch.querySelectorAll(".route-map").forEach(el => { renderCardMap(el); });
+  batch.querySelectorAll(".route-map-multi").forEach(el => { renderTransferMap(el); });
 }
 function renderDirectCard(result) {
   const { route, originStop, destStop, subWaypoints } = result;
@@ -996,6 +1045,19 @@ function renderTransferCard(result) {
   `;
 }
 
+// ===== PETA DASAR =====
+// Ubin OpenStreetMap. Atribusi wajib tampil sesuai ketentuan pemakaian OSM.
+function baseTiles() {
+  return L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  });
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
 async function renderCardMap(el) {
   const waypoints = JSON.parse(el.dataset.waypoints || "[]");
   const origin = el.dataset.origin;
@@ -1010,8 +1072,8 @@ async function renderCardMap(el) {
   // Wajib pastikan elemen card map punya tinggi CSS eksplisit
   el.style.height = "220px"; 
 
-  const map = L.map(el, { zoomControl: true, attributionControl: false, dragging: true, scrollWheelZoom: true });
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(map);
+  const map = L.map(el, { zoomControl: true, attributionControl: true, dragging: true, scrollWheelZoom: true });
+  baseTiles().addTo(map);
 
   const straightLine = L.polyline(coords, { color: '#000000', weight: 4, opacity: 0.8 }).addTo(map);
   
@@ -1022,9 +1084,10 @@ async function renderCardMap(el) {
 
   map.fitBounds(L.latLngBounds(coords), { padding: [30, 30] });
 
-  // WAJIB ADA: Memaksa Leaflet merender ulang ukuran peta setelah elemen terbuka
+  // Peta dibuat saat tampilan hasil masih tersembunyi, jadi ukuran dan batasnya dihitung ulang setelah tampil.
   setTimeout(() => {
     map.invalidateSize();
+    map.fitBounds(L.latLngBounds(coords), { padding: [30, 30] });
   }, 300);
 
   // Upgrade dengan OSRM road snapping jika ada jaringan
@@ -1045,8 +1108,8 @@ async function renderTransferMap(el) {
 
   el.style.height = "220px";
 
-  const map = L.map(el, { zoomControl: true, attributionControl: false, dragging: true, scrollWheelZoom: true });
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(map);
+  const map = L.map(el, { zoomControl: true, attributionControl: true, dragging: true, scrollWheelZoom: true });
+  baseTiles().addTo(map);
 
   const straightLine = L.polyline(coords, { color: '#000000', weight: 4, opacity: 0.8 }).addTo(map);
   
@@ -1060,7 +1123,11 @@ async function renderTransferMap(el) {
   map.fitBounds(L.latLngBounds(coords), { padding: [30, 30] });
   el._leaflet_map = map;
 
-  setTimeout(() => { map.invalidateSize(); }, 300);
+  // Peta dibuat saat tampilan hasil masih tersembunyi, jadi batasnya dihitung ulang setelah tampil.
+  setTimeout(() => {
+    map.invalidateSize();
+    map.fitBounds(L.latLngBounds(coords), { padding: [30, 30] });
+  }, 300);
   upgradeToRoadGeometry(map, straightLine, coords);
 }
 
@@ -1101,15 +1168,16 @@ function setupSuggestions(inputEl, hiddenEl, listEl) {
       listEl.classList.add("hidden");
       return;
     }
-    const matches = ALL_STOPS.filter(s => stopsMatch(val, s)).slice(0, 6);
+    const typed = normalize(val);
+    const matches = ALL_STOPS.filter(s => normalize(s).includes(typed) || stopsMatch(val, s)).slice(0, 6);
     if (matches.length === 0) {
       listEl.classList.add("hidden");
       return;
     }
     listEl.innerHTML = matches.map(m => `
-      <div class="sugg-item px-4 py-2.5 text-xs font-body hover:bg-[#4da2ff]/10 cursor-pointer border-b border-[#000]/5 last:border-0 font-medium flex items-center gap-2" data-value="${m}">
+      <div class="sugg-item px-4 py-2.5 text-xs font-body hover:bg-[#4da2ff]/10 cursor-pointer border-b border-[#000]/5 last:border-0 font-medium flex items-center gap-2" data-value="${escapeHtml(m)}">
         <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#4da2ff] shrink-0"></i>
-        <span class="truncate">${m}</span>
+        <span class="truncate">${escapeHtml(m)}</span>
       </div>
     `).join("");
     listEl.classList.remove("hidden");
@@ -1293,8 +1361,8 @@ function openRouteDetail(route) {
     if (!mapEl) return;
     if (modalMap) { modalMap.remove(); modalMap = null; }
     
-    modalMap = L.map(mapEl, { zoomControl: false, attributionControl: false, scrollWheelZoom: false });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(modalMap);
+    modalMap = L.map(mapEl, { zoomControl: false, attributionControl: true, scrollWheelZoom: false });
+    baseTiles().addTo(modalMap);
     
     const validCoords = wps.map(wp => getStopCoords(wp)).filter(Boolean);
     if (validCoords.length >= 2) {
@@ -1337,8 +1405,8 @@ function initTrackingMap(routeData) {
   if (!mapEl) return;
   if (trackingMap) { trackingMap.remove(); trackingMap = null; }
 
-  trackingMap = L.map(mapEl, { zoomControl: false, attributionControl: false }).setView([3.5950, 98.6700], 13);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(trackingMap);
+  trackingMap = L.map(mapEl, { zoomControl: false, attributionControl: true }).setView([3.5950, 98.6700], 13);
+  baseTiles().addTo(trackingMap);
 
   const nameEl = document.getElementById("tracking-route-name");
   const infoEl = document.getElementById("tracking-route-info");
@@ -1421,6 +1489,10 @@ function stopTracking() {
 function initApp() {
   lucide.createIcons();
   renderPopularRoutes();
+
+  // Angka di hero diambil dari data, supaya tidak tertinggal saat data.js berubah.
+  const heroStops = document.getElementById("hero-stops-count");
+  if (heroStops && typeof ALL_STOPS !== "undefined") heroStops.textContent = ALL_STOPS.length;
 
   applyLang(currentLang);
 
