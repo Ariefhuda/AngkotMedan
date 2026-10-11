@@ -1,117 +1,105 @@
-<div align="center">
+# AngkotMedan
 
-# 🚐 AngkotMedan
+Web pencari rute angkot di Kota Medan. Ketik tempat asal dan tujuan, lalu situs ini menampilkan angkot nomor berapa yang bisa dinaiki, di mana naik dan turunnya, dan perlu pindah angkot atau tidak.
 
-**Cari Rute Angkot di Medan dengan Mudah**
+Demo: https://angkotmedan.netlify.app
 
-[![Netlify Status](https://img.shields.io/badge/deployed-netlify-brightgreen)](https://angkotmedan.netlify.app)
-![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
-![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=flat&logo=leaflet&logoColor=white)
-
-[Live Demo](https://angkotmedan.netlify.app) · [Tentang](https://angkotmedan.netlify.app/tentang) · [Semua Trayek](https://angkotmedan.netlify.app/semua-trayek)
-
-</div>
-
----
-
-## Tentang
-
-AngkotMedan adalah web app pencari rute angkot (angkutan kota) di Medan, Indonesia. Dibuat untuk membantu warga Medan dan pendatang menemukan rute angkot yang tepat dari satu titik ke titik lain — tanpa perlu tanya ke tetangga atau driver.
-
-**Masalah yang diselesaikan:** Di Medan, tidak ada satu pun sumber data resmi yang menampilkan semua rute angkot secara lengkap dan mudah diakses. Informasi sering bergantung pada mulut ke mulut, yang sering bikin salah turun atau salah naik.
+Proyek ini dibuat karena informasi trayek angkot Medan sulit dicari. Tidak ada satu halaman pun yang memuat semua trayek, jadi pendatang biasanya harus bertanya ke orang di jalan. Situs ini bukan layanan resmi Dishub Kota Medan.
 
 ## Fitur
 
-- **Pencarian Rute Cerdas** — Cari rute langsung (direct) dan rute transfer (1-2 kali transfer)
-- **Peta Interaktif** — Jalur angkot mengikuti jalan asli (via OSRM road snapping)
-- **197 POI** — Rumah sakit, kampus, terminal, mall, pasar, dan lainnya
-- **Transportasi Publik** — 7 Trans Metro Deli + 3 Bus Listrik
-- **Panduan Warna Livery** — Kenali angkot dari warna badan kendaraan
-- **8 Bahasa** — Indonesia, English, Jawa, Melayu, Batak, Minang, Sunda, Aceh
-- **Detail Trayek** — Klik kartu trayek untuk lihat daftar halte, jarak, dan estimasi waktu
-- **Multi-Page** — Halaman beranda, tentang, dan explorer trayek terpisah
-- **Mobile-Friendly** — Responsive, iOS safe-area, PWA-ready
+- Cari rute langsung dari asal ke tujuan.
+- Cari rute dengan satu kali pindah angkot kalau tidak ada rute langsung. Titik pindah yang dipilih adalah yang jumlah haltenya paling sedikit.
+- Peta tiap rute. Garisnya mengikuti jalan, bukan garis lurus antarhalte.
+- Saran nama halte saat mengetik. Singkatan ikut dikenali, jadi "Terminal Amplas" cocok dengan "T. Amplas".
+- Tombol "Lokasi saya" untuk mengisi asal dari GPS.
+- "Lacak Rute Ini" untuk melihat posisi sendiri di peta selama perjalanan.
+- Halaman Semua Trayek berisi daftar seluruh trayek, bisa dicari dan disaring menurut warna angkot.
+- Antarmuka dalam 8 bahasa: Indonesia, Inggris, Jawa, Melayu, Batak, Minang, Sunda, Aceh.
 
-## Tech Stack
+Trayek satu arah hanya ditawarkan searah urutan haltenya. Trayek pulang-pergi ditawarkan ke dua arah.
 
-| Layer | Teknologi |
-|-------|-----------|
-| Frontend | HTML5, Tailwind CSS (CDN), Vanilla JavaScript |
-| Peta | Leaflet.js + OpenStreetMap |
-| Rute Jalan | OSRM API (road-following polyline) |
-| Geocoding | Nominatim (OpenStreetMap) |
-| Deploy | Netlify (static) |
-| Server (lokal) | Node.js static server |
+## Data
 
-## Struktur Projek
+Semua data ada di `js/data.js`.
 
-```
-AngkotMedan/
-├── index.html          # Beranda — hero, pencarian, hasil rute, tracking
-├── tentang.html        # Tentang — masalah transit, cara kerja, livery guide
-├── semua-trayek.html   # Explorer — grid semua 118 trayek, detail modal
-├── server.js           # Node.js static server (localhost:8080)
-├── _redirects          # Netlify SPA fallback
-├── logo.png            # Logo AngkotMedan
-├── css/
-│   └── style.css       # Slush Design System — brutalist aesthetic
-├── js/
-│   ├── app.js          # Core logic: i18n, search, map, routing, UI
-│   └── data.js         # 118 routes, 170+ stops, 197 POIs, transport data
-└── img/                # Assets gambar
-```
+| Isi | Jumlah |
+|---|---|
+| Trayek angkot | 118 (97 pulang-pergi, 21 satu arah) |
+| Operator | 17 |
+| Halte dan titik lewat | 190, semuanya punya koordinat |
+| Rute Trans Metro Deli dan Bus Listrik | 10 (sudah ada di data, belum ditampilkan di situs) |
 
-## Mulai
+`trayek_angkot_medan.csv` adalah bentuk tabel dari daftar trayek yang sama.
 
-### Online (Netlify)
+Data dikumpulkan dari sumber publik dan pengamatan di lapangan. Trayek angkot sering berubah, jadi ada kemungkinan sebagian sudah tidak sesuai. Satu trayek (KPUM 86) baru tercatat satu titik sehingga belum bisa dipakai untuk pencarian.
 
-Kunjungi [angkotmedan.netlify.app](https://angkotmedan.netlify.app) — langsung pakai, tanpa install.
+## Warna angkot
 
-### Lokal
+Angkot Medan dibedakan dari warna badannya. Kartu hasil pencarian menampilkan warna ini supaya angkotnya mudah dikenali di jalan.
+
+| Warna | Jumlah trayek |
+|---|---|
+| Kuning | 56 |
+| Hijau | 18 |
+| Merah Hijau | 12 |
+| Biru | 11 |
+| Merah Kuning | 10 |
+| Putih, Putih Hijau | 2 |
+| Belum tercatat | 9 |
+
+## Teknologi
+
+| Bagian | Yang dipakai |
+|---|---|
+| Halaman | HTML, Tailwind CSS (lewat CDN), JavaScript tanpa framework |
+| Peta | Leaflet dengan ubin OpenStreetMap |
+| Garis rute di jalan | API publik OSRM |
+| Hosting | Netlify, situs statis |
+
+Tidak ada backend dan tidak ada langkah build. Pencarian rute berjalan di browser.
+
+## Menjalankan di komputer sendiri
+
+Butuh Node.js, tanpa `npm install`.
 
 ```bash
-git clone https://github.com/Ariefhuda434/AngkotMedan.git
+git clone https://github.com/Ariefhuda/AngkotMedan.git
 cd AngkotMedan
 node server.js
 ```
 
-Buka `http://localhost:8080` di browser.
+Buka http://localhost:8080. Port bisa diganti dengan `PORT=3000 node server.js`.
 
-## Data
+`server.js` hanya server berkas statis untuk pengembangan. Aturan alamatnya sama dengan `_redirects` yang dipakai Netlify: `/tentang` dan `/semua-trayek` diarahkan ke berkas HTML-nya, alamat lain jatuh ke beranda.
 
-- **118 trayek angkot** dari berbagai operator di Medan
-- **170+ halte dan titik** yang tersebar di seluruh kota
-- **197 POI** (rumah sakit, kampus, terminal, mall, pasar, dll)
-- **10 rute transportasi publik** (Trans Metro Deli + Bus Listrik)
-- Data dikumpulkan dari sumber publik, papan informasi halte, dan komunitas pengguna angkot
+Peta dan garis rute butuh koneksi internet karena ubin peta dan OSRM diambil dari server luar. Tanpa internet, pencarian tetap jalan tetapi petanya kosong.
 
-> ⚠️ Data bisa berubah sewaktu-waktu karena trayek angkot sering disesuaikan oleh operator.
+## Susunan berkas
 
-## Livery Angkot Medan
+```
+index.html              beranda: pencarian, hasil rute, pelacakan
+tentang.html            penjelasan proyek dan panduan warna angkot
+semua-trayek.html       daftar semua trayek
+js/app.js               terjemahan, pencarian rute, peta, tampilan
+js/data.js              trayek, halte, koordinat
+css/style.css           gaya tambahan di luar Tailwind
+server.js               server lokal
+_redirects              aturan alamat untuk Netlify
+trayek_angkot_medan.csv daftar trayek dalam bentuk tabel
+DESIGN.md               catatan sistem desain
+```
 
-| Warna | Operator / Keterangan |
-|-------|----------------------|
-| 🟡 Kuning Emas | KPUM, Angkot Umum, Wampu Mini — mayoritas trayek |
-| 🔵 Biru Laut | Medan Bus, Nasional Medan Transport |
-| 🟢 Hijau Daun | Medan Mars, Medan Morina — trayek perifer |
-| 🔴 Merah | RMC (Rahayu Medan Ceria), Mitra Transport |
+## Cara kerja pencarian
 
-## Bahasa
+1. Nama yang diketik dicocokkan ke halte di data. Tanda baca diabaikan dan singkatan umum disamakan (`T.` jadi terminal, `Simp.` jadi simpang, `Jl.` jadi jalan).
+2. Rute langsung: semua trayek yang melewati halte asal dan tujuan dalam arah yang benar.
+3. Rute pindah: pasangan trayek yang bertemu di satu halte. Pasangan yang salah satu trayeknya sudah bisa sampai sendiri dilewati, karena sudah muncul sebagai rute langsung.
+4. Hasil diurutkan dari jumlah halte paling sedikit dan ditampilkan lima per lima.
 
-Aplikasi mendukung 8 bahasa untuk pengguna lokal dan pendatang:
+## Keterbatasan
 
-🇮🇩 Indonesia · 🇺🇸 English · 🎭 Jawa · 🇲🇾 Melayu · 🏠 Batak · 🌾 Minang · 🏔️ Sunda · 🕌 Aceh
-
-## Lisensi
-
-Dibuat untuk komunitas Medan. Bukan resmi Dishub Medan.
-
----
-
-<div align="center">
-
-**Made for Medan 🇮🇩**
-
-</div>
+- Rute dengan dua kali pindah belum dicari.
+- Estimasi waktu di kartu hasil adalah perkiraan kasar dari jumlah halte, bukan dari kondisi lalu lintas.
+- Tailwind dimuat dari CDN. Itu cukup untuk proyek ini, tetapi browser akan menampilkan peringatan di konsol.
+- OSRM yang dipakai adalah server demo publik. Kalau server itu lambat atau menolak, garis rute kembali jadi garis lurus antarhalte.
