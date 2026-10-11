@@ -1,500 +1,143 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#4da2ff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Angkot Medan Finder | Cari Rute Angkot Medan</title>
-  <meta name="description" content="Temukan rute angkot terbaik di Medan. 118 trayek angkot, 190 halte. Gratis, cepat, dan akurat.">
-  <meta property="og:title" content="Angkot Medan Finder | Cari Rute Angkot Medan">
-  <meta property="og:description" content="Temukan rute angkot terbaik di Medan. 118 trayek angkot, 190 halte. Gratis, cepat, dan akurat.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="img/hero-angkot.jpg">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Angkot Medan Finder">
-  <meta name="twitter:description" content="Temukan rute angkot terbaik di Medan. 118 trayek angkot, 190 halte.">
-  <meta name="twitter:image" content="img/hero-angkot.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AngkotMedan | Cari rute angkot di Medan</title>
+  <meta name="description" content="Ketik tempat asal dan tujuan di Medan, lalu lihat angkot nomor berapa yang dinaiki, di mana naik, pindah, dan turun.">
+  <meta property="og:title" content="AngkotMedan | Cari rute angkot di Medan">
+  <meta property="og:description" content="Ketik tempat asal dan tujuan di Medan, lalu lihat angkot nomor berapa yang dinaiki, di mana naik, pindah, dan turun.">
+  <meta property="og:image" content="/img/hero-angkot.jpg">
+  <meta name="theme-color" content="#0c6b45">
   <link rel="icon" type="image/png" href="/logo.png">
   <link rel="apple-touch-icon" href="/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            mustard: '#ffd731',
-            sunburst: '#ffd731',
-            navy: '#4da2ff',
-            'electric-blue': '#4da2ff',
-            'mint-pop': '#55db9c',
-            lavender: '#e9ccff',
-            ember: '#fb4903',
-            'voltage-violet': '#5c4ade',
-            asphalt: '#000000',
-            carbon: '#000000',
-            ivory: '#ffffff',
-            paper: '#ffffff',
-            'sky-wash': '#dceeff',
-            'concrete': '#cccccc',
-          },
-          fontFamily: {
-            display: ['"Bowlby One SC"', 'system-ui', 'sans-serif'],
-            body: ['"Inter"', 'system-ui', 'sans-serif'],
-          },
-          borderRadius: {
-            'pill': '9999px',
-          },
-          boxShadow: {
-            'brutal': '3px 3px 0px 0px #000000',
-            'brutal-sm': '2px 2px 0px 0px #000000',
-            'brutal-lg': '5px 5px 0px 0px #000000',
-            'brutal-active': '1px 1px 0px 0px #000000',
-          },
-          borderWidth: {
-            '1.5': '1.5px',
-          }
-        }
-      }
-    }
-  </script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
-  
-  <style>
-    [data-view="tracking"] .leaflet-top { top: 56px !important; }
-    [data-view="tracking"] .leaflet-bottom { bottom: 148px !important; }
-    @media (min-width: 640px) {
-      [data-view="tracking"] .leaflet-top { top: 64px !important; }
-    }
-    @media (min-width: 768px) {
-      [data-view="tracking"] .leaflet-top { top: 80px !important; }
-    }
-    @media (max-width: 640px) {
-      [data-view="tracking"] .leaflet-bottom { bottom: calc(168px + env(safe-area-inset-bottom, 0px)) !important; }
-    }
-  </style>
 </head>
-<body class="bg-[#dceeff] min-h-[100dvh] flex flex-col font-body text-[#000000] antialiased slush-canvas">
+<body>
+  <header class="site-header" id="site-navbar">
+    <div class="wrap">
+      <a class="brand" href="/"><img src="/logo.png" alt=""> AngkotMedan</a>
+      <nav class="site-nav" aria-label="Utama">
+        <a href="/" aria-current="page" data-i18n="nav_home">Beranda</a>
+        <a href="/semua-trayek">Trayek</a>
+        <a href="/tentang" data-i18n="nav_about">Tentang</a>
+        <div class="lang">
+          <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Ganti bahasa"><i data-lucide="globe"></i><span id="lang-label">ID</span></button>
+          <div class="lang-menu hidden" id="lang-dropdown">
+          <button type="button" class="lang-option" data-lang="id">Indonesia</button>
+          <button type="button" class="lang-option" data-lang="en">English</button>
+          <button type="button" class="lang-option" data-lang="jv">Jawa</button>
+          <button type="button" class="lang-option" data-lang="ms">Melayu</button>
+          <button type="button" class="lang-option" data-lang="btk">Batak</button>
+          <button type="button" class="lang-option" data-lang="min">Minang</button>
+          <button type="button" class="lang-option" data-lang="su">Sunda</button>
+          <button type="button" class="lang-option" data-lang="ace">Aceh</button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
 
-  <!-- LOADING OVERLAY -->
-  <div id="loading-overlay" class="hidden fixed inset-0 z-[100] bg-[#dceeff]/95 backdrop-blur-sm flex flex-col items-center justify-center gap-6">
-    <div class="loading-illustration">
-      <svg viewBox="0 0 400 220" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-72 md:w-96">
-        <!-- Road -->
-        <rect x="0" y="170" width="400" height="40" fill="#000000" rx="20"/>
-        <line x1="20" y1="190" x2="60" y2="190" stroke="#4da2ff" stroke-width="3" stroke-dasharray="12 8" class="road-dash"/>
-        <line x1="80" y1="190" x2="120" y2="190" stroke="#4da2ff" stroke-width="3" stroke-dasharray="12 8" class="road-dash"/>
-        <line x1="140" y1="190" x2="180" y2="190" stroke="#4da2ff" stroke-width="3" stroke-dasharray="12 8" class="road-dash"/>
-        <line x1="200" y1="190" x2="240" y2="190" stroke="#4da2ff" stroke-width="3" stroke-dasharray="12 8" class="road-dash"/>
-        <line x1="260" y1="190" x2="300" y2="190" stroke="#4da2ff" stroke-width="3" stroke-dasharray="12 8" class="road-dash"/>
-        <line x1="320" y1="190" x2="360" y2="190" stroke="#4da2ff" stroke-width="3" stroke-dasharray="12 8" class="road-dash"/>
-        <!-- Angkot body -->
-        <g class="angkot-bounce">
-          <rect x="110" y="110" width="180" height="60" rx="20" fill="#ffd731" stroke="#000000" stroke-width="3"/>
-          <rect x="105" y="105" width="190" height="12" rx="6" fill="#000000"/>
-          <rect x="125" y="120" width="35" height="28" rx="8" fill="#dceeff" stroke="#000000" stroke-width="2"/>
-          <rect x="170" y="120" width="35" height="28" rx="8" fill="#dceeff" stroke="#000000" stroke-width="2"/>
-          <rect x="215" y="120" width="35" height="28" rx="8" fill="#dceeff" stroke="#000000" stroke-width="2"/>
-          <rect x="260" y="120" width="20" height="28" rx="8" fill="#dceeff" stroke="#000000" stroke-width="2"/>
-          <rect x="290" y="138" width="8" height="12" rx="4" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
-          <rect x="105" y="165" width="190" height="8" rx="4" fill="#000000"/>
-          <circle cx="155" cy="175" r="16" fill="#000000"/>
-          <circle cx="155" cy="175" r="8" fill="#555"/>
-          <circle cx="155" cy="175" r="3" fill="#888"/>
-          <circle cx="245" cy="175" r="16" fill="#000000"/>
-          <circle cx="245" cy="175" r="8" fill="#555"/>
-          <circle cx="245" cy="175" r="3" fill="#888"/>
-          <text x="200" y="155" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="11" fill="#000000" letter-spacing="2">ANGKOT</text>
-        </g>
-        <g class="signal-pulse">
-          <circle cx="200" cy="85" r="8" fill="none" stroke="#4da2ff" stroke-width="2" opacity="0.6"/>
-          <circle cx="200" cy="85" r="16" fill="none" stroke="#4da2ff" stroke-width="1.5" opacity="0.4"/>
-          <circle cx="200" cy="85" r="24" fill="none" stroke="#4da2ff" stroke-width="1" opacity="0.2"/>
-          <circle cx="200" cy="85" r="4" fill="#4da2ff"/>
-        </g>
-        <circle cx="50" cy="145" r="18" fill="#55db9c" opacity="0.7"/>
-        <rect x="47" y="155" width="6" height="18" fill="#5D4037"/>
-        <circle cx="350" cy="140" r="22" fill="#55db9c" opacity="0.6"/>
-        <rect x="347" y="155" width="6" height="18" fill="#5D4037"/>
-      </svg>
-    </div>
-    <div class="text-center">
-      <p class="font-display text-lg font-bold text-[#000000]">Mencari rute angkot...</p>
-      <p class="font-body text-sm text-[#000]/50 mt-1">Sedang menghubungkan <span id="loading-origin" class="font-semibold text-[#000000]">...</span> ke <span id="loading-dest" class="font-semibold text-[#000000]">...</span></p>
-    </div>
-    <div class="loading-dots flex gap-2">
-      <span class="w-3 h-3 rounded-full bg-[#ffd731] border-2 border-[#000000] loading-dot"></span>
-      <span class="w-3 h-3 rounded-full bg-[#4da2ff] border-2 border-[#000000] loading-dot"></span>
-      <span class="w-3 h-3 rounded-full bg-[#55db9c] border-2 border-[#000000] loading-dot"></span>
+  <div class="loading hidden" id="loading-overlay" role="status">
+    <div class="loading-box">
+      <p>Mencari angkot dari <span id="loading-origin"></span> ke <span id="loading-dest"></span></p>
+      <div class="loading-bar"></div>
     </div>
   </div>
 
-  <!-- NAVBAR -->
-  <nav id="site-navbar" class="sticky top-0 z-50 bg-[#ffffff]/95 backdrop-blur-sm transition-shadow duration-200">
-    <div class="max-w-5xl mx-auto px-3 sm:px-4 h-14 sm:h-16 md:h-20 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-1.5 group shrink-0">
-        <div class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center overflow-hidden">
-          <img src="/logo.png" alt="Angkot Medan" class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain" />
-        </div>
-        <div class="hidden sm:block">
-          <p class="font-display font-bold text-sm leading-none tracking-tight text-[#000000]">Angkot<span class="text-[#ffd731]">Medan</span></p>
-          <p class="font-body text-[10px] text-[#000]/40 leading-none mt-0.5 tracking-wide">FINDER</p>
-        </div>
-      </a>
+  <main>
+    <div data-view="home">
+      <div class="wrap home-top">
+        <section class="board">
+          <h1 data-i18n="hero_title">Baru di Medan? Naik angkot aja</h1>
+          <p class="lede" data-i18n="hero_subtitle">Baru datang ke Medan dan bingung naik angkot apa? Ketik asal dan tujuan, langsung tahu rute yang tepat. Gratis, gak perlu tanya orang.</p>
 
-      <div class="flex items-center gap-0.5 sm:gap-1">
-        <span class="hidden sm:inline-flex items-center px-3 py-1 bg-[#4da2ff]/15 text-[#4da2ff] font-display font-bold text-[11px] border-2 border-[#4da2ff]/30 mr-2 rounded-pill" id="route-count-badge">118</span>
-        <a href="/" class="nav-link px-2 sm:px-3 py-1.5 font-display text-[11px] sm:text-sm font-bold text-[#ffd731] transition-colors relative" data-i18n="nav_home">Beranda</a>
-        <a href="/tentang" class="nav-link px-2 sm:px-3 py-1.5 font-display text-[11px] sm:text-sm font-medium text-[#000]/50 hover:text-[#000000] transition-colors relative" data-i18n="nav_about">Tentang</a>
-        <div class="relative ml-0.5 sm:ml-1">
-          <button id="lang-toggle" class="flex items-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg border-2 border-[#000]/10 hover:border-[#000000] hover:bg-[#ffd731]/10 transition-all font-display text-[11px] sm:text-xs font-bold text-[#000]/50">
-            <i data-lucide="globe" class="w-3.5 h-3.5"></i>
-            <span id="lang-label" class="hidden sm:inline">ID</span>
-          </button>
-          <div id="lang-dropdown" class="hidden absolute right-0 top-full mt-1 bg-white border-2 border-[#000000] shadow-brutal rounded-lg overflow-hidden z-60 min-w-[120px] max-h-[300px] overflow-y-auto">
-            <button data-lang="id" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#ffd731]/10 flex items-center gap-2"><span>🇮🇩</span> Indonesia</button>
-            <button data-lang="en" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#4da2ff]/10 flex items-center gap-2"><span>🇺🇸</span> English</button>
-            <button data-lang="jv" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#55db9c]/10 flex items-center gap-2"><span>🎭</span> Jawa</button>
-            <button data-lang="ms" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#fb4903]/10 flex items-center gap-2"><span>🇲🇾</span> Melayu</button>
-            <button data-lang="btk" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#e9ccff]/10 flex items-center gap-2"><span>🏠</span> Batak</button>
-            <button data-lang="min" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#ffd731]/10 flex items-center gap-2"><span>🌾</span> Minang</button>
-            <button data-lang="su" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#4da2ff]/10 flex items-center gap-2"><span>🏔️</span> Sunda</button>
-            <button data-lang="ace" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#e9ccff]/10 flex items-center gap-2"><span>🕌</span> Aceh</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <!-- HOME VIEW -->
-  <main data-view="home" class="flex-col pt-6 pb-20 flex-1">
-    <div class="max-w-5xl mx-auto px-4">
-
-      <!-- HERO -->
-      <section class="mb-14">
-        <div class="relative bg-[#ffffff] border-2 border-[#000000] shadow-brutal overflow-hidden rounded-2xl">
-          <div class="absolute top-4 right-4 flex gap-1.5 z-10">
-            <span class="w-3 h-3 rounded-full bg-[#ffd731] border border-[#000000] sticker-float" style="animation-delay:0s"></span>
-            <span class="w-3 h-3 rounded-full bg-[#4da2ff] border border-[#000000] sticker-float" style="animation-delay:0.3s"></span>
-            <span class="w-3 h-3 rounded-full bg-[#55db9c] border border-[#000000] sticker-float" style="animation-delay:0.6s"></span>
-          </div>
-
-          <div class="relative flex flex-col lg:flex-row">
-            <!-- Left: Copy -->
-            <div class="flex-1 p-5 sm:p-8 md:p-10 lg:p-12">
-              <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-[#4da2ff]/10 border-2 border-[#4da2ff]/20 rounded-pill mb-5">
-                <svg viewBox="0 0 16 16" class="w-3 h-3 text-[#4da2ff]" fill="currentColor"><circle cx="8" cy="8" r="4"/></svg>
-                <span class="font-display text-[11px] font-bold text-[#4da2ff] uppercase tracking-widest" data-i18n="hero_location">Kota Medan, Sumatera Utara</span>
-              </div>
-
-              <h1 class="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[3.4rem] font-bold text-[#000000] leading-[1.05] tracking-tight mb-5" data-i18n="hero_title">
-                Baru di Medan?<br>
-                <span class="text-[#ffd731] relative inline-block">
-                  Naik Angkot
-                  <svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg>
-                </span> Aja
-              </h1>
-
-              <p class="font-body text-base text-[#000]/55 max-w-md leading-relaxed mb-8" data-i18n="hero_subtitle">
-                Baru datang ke Medan dan bingung naik angkot apa? Ketik asal & tujuan, langsung tahu rute yang tepat. Gratis, gak perlu tanya orang.
-              </p>
-
-              <!-- Stats row (DIPERBAIKI DENGAN flex-wrap) -->
-              <div class="flex flex-wrap items-center gap-y-4 gap-x-4 sm:gap-6">
-                <div>
-                  <p class="font-display text-2xl font-black text-[#ffd731] leading-none">118</p>
-                  <p class="font-body text-[11px] text-[#000]/40 mt-0.5">Trayek</p>
-                </div>
-                <div class="hidden sm:block w-px h-8 bg-[#000]/10"></div>
-                <div>
-                  <p class="font-display text-2xl font-black text-[#4da2ff] leading-none" id="hero-stops-count">190</p>
-                  <p class="font-body text-[11px] text-[#000]/40 mt-0.5">Halte</p>
-                </div>
-                <div class="hidden sm:block w-px h-8 bg-[#000]/10"></div>
-                <div>
-                  <p class="font-display text-2xl font-black text-[#55db9c] leading-none">4</p>
-                  <p class="font-body text-[11px] text-[#000]/40 mt-0.5">Warna</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right: Angkot Illustration -->
-            <div class="hidden lg:flex w-80 border-l-2 border-[#000000] overflow-hidden relative">
-              <img src="/img/hero-angkot.jpg" alt="Angkot kuning di jalanan kota" class="w-full h-full object-cover" loading="lazy">
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SEARCH FORM -->
-      <section class="mb-14">
-        <form id="search-form" class="bg-[#ffffff] border-2 border-[#000000] shadow-brutal p-4 sm:p-6 md:p-8 rounded-2xl">
-          <div class="flex items-center gap-2 mb-5">
-            <div class="w-7 h-7 bg-[#4da2ff] border-2 border-[#000000] shadow-brutal-sm rounded-full flex items-center justify-center">
-              <i data-lucide="search" class="w-4 h-4 text-[#000000]"></i>
-            </div>
-            <h2 class="font-display text-base font-bold text-[#000000]" data-i18n="search_title">Cari Rute Angkot</h2>
-          </div>
-
-          <div class="flex flex-col gap-4">
-            <!-- ORIGIN -->
-            <div>
-              <label for="origin-input" class="block font-display text-[11px] font-bold text-[#000]/40 uppercase tracking-widest mb-2" data-i18n="label_origin">Dari mana?</label>
-              <div class="relative input-group">
-                <i data-lucide="map-pin" class="search-icon absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#000]/25 pointer-events-none"></i>
-                <input type="text" id="origin-input" data-i18n-placeholder="placeholder_origin" placeholder="Contoh: Bandara, Stasiun, Sun Plaza..."
-                  class="w-full pl-11 pr-4 py-3.5 bg-[#f0f7ff] border-2 border-[#000000] rounded-lg font-body text-sm text-[#000000] placeholder:text-[#000]/25 focus:outline-none focus:ring-0 focus:border-[#4da2ff] transition-all"
-                  autocomplete="off">
+          <form id="search-form" novalidate>
+            <div class="field">
+              <label for="origin-input" data-i18n="label_origin">Dari mana?</label>
+              <div class="field-input">
+                <input type="text" id="origin-input" autocomplete="off" data-i18n-placeholder="placeholder_origin" placeholder="Contoh: Bandara, Stasiun, Sun Plaza...">
                 <input type="hidden" id="origin-resolved" value="">
-                <div id="origin-suggestions" class="absolute z-60 top-full left-0 right-0 mt-1 bg-[#ffffff] border-2 border-[#000000] shadow-brutal hidden max-h-48 overflow-y-auto rounded-lg"></div>
+                <div class="suggestions hidden" id="origin-suggestions"></div>
               </div>
             </div>
 
-            <!-- SWAP + GEO -->
-            <div class="flex items-center gap-2 pl-1">
-              <button type="button" id="swap-btn" class="flex items-center justify-center w-9 h-9 rounded-full border-2 border-[#000]/15 hover:border-[#000000] hover:bg-[#ffd731]/10 transition-all" title="Tukar asal & tujuan">
-                <i data-lucide="arrow-up-down" class="w-4 h-4 text-[#000]/40"></i>
-              </button>
-              <button type="button" id="geoloc-btn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-pill border-2 border-[#000]/15 hover:border-[#4da2ff] hover:bg-[#4da2ff]/5 transition-all font-display text-xs font-medium text-[#000]/50 hover:text-[#4da2ff]">
-                <i data-lucide="navigation" class="w-3.5 h-3.5"></i>
-                <span data-i18n="btn_my_location">Lokasi saya</span>
-              </button>
+            <div class="field-tools">
+              <button type="button" class="tool" id="geoloc-btn"><i data-lucide="locate-fixed"></i><span data-i18n="btn_my_location">Lokasi saya</span></button>
+              <button type="button" class="tool" id="swap-btn"><i data-lucide="arrow-up-down"></i>Tukar</button>
             </div>
 
-            <!-- DESTINATION -->
-            <div>
-              <label for="dest-input" class="block font-display text-[11px] font-bold text-[#000]/40 uppercase tracking-widest mb-2" data-i18n="label_dest">Mau ke mana?</label>
-              <div class="relative input-group">
-                <i data-lucide="flag" class="search-icon absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#000]/25 pointer-events-none"></i>
-                <input type="text" id="dest-input" data-i18n-placeholder="placeholder_dest" placeholder="Contoh: USU, RS Adam Malik, Istana Maimun..."
-                  class="w-full pl-11 pr-4 py-3.5 bg-[#f0f7ff] border-2 border-[#000000] rounded-lg font-body text-sm text-[#000000] placeholder:text-[#000]/25 focus:outline-none focus:ring-0 focus:border-[#4da2ff] transition-all"
-                  autocomplete="off">
+            <div class="field">
+              <label for="dest-input" data-i18n="label_dest">Mau ke mana?</label>
+              <div class="field-input">
+                <input type="text" id="dest-input" autocomplete="off" data-i18n-placeholder="placeholder_dest" placeholder="Contoh: USU, RS Adam Malik, Istana Maimun...">
                 <input type="hidden" id="dest-resolved" value="">
-                <div id="dest-suggestions" class="absolute z-60 top-full left-0 right-0 mt-1 bg-[#ffffff] border-2 border-[#000000] shadow-brutal hidden max-h-48 overflow-y-auto rounded-lg"></div>
+                <div class="suggestions hidden" id="dest-suggestions"></div>
               </div>
             </div>
 
-            <!-- ERROR -->
-            <div id="search-error" class="hidden bg-[#fb4903]/10 border-2 border-[#fb4903] text-[#fb4903] px-4 py-3 font-body text-sm font-medium rounded-lg"></div>
+            <p class="form-error hidden" id="search-error" role="alert"></p>
+            <button type="submit" class="btn btn-go" data-i18n="btn_search">Cari Rute</button>
+          </form>
+        </section>
 
-            <!-- SUBMIT -->
-            <button type="submit" class="w-full py-4 bg-[#ffd731] border-2 border-[#000000] shadow-brutal rounded-pill font-display font-bold text-sm text-[#000000] uppercase tracking-wider hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutal-lg active:translate-x-[1px] active:translate-y-[1px] active:shadow-brutal-active transition-all flex items-center justify-center gap-2">
-              <i data-lucide="search" class="w-4 h-4"></i>
-              <span data-i18n="btn_search">Cari Rute</span>
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <!-- POPULAR ROUTES -->
-      <section class="mb-14">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="font-display text-lg font-bold text-[#000000] flex items-center gap-2.5">
-            <div class="w-7 h-7 bg-[#ffd731] border-2 border-[#000000] shadow-brutal-sm rounded-full flex items-center justify-center">
-              <i data-lucide="trending-up" class="w-4 h-4 text-[#000000]"></i>
-            </div>
-            <span data-i18n="popular_title">Rute Populer</span>
-          </h2>
-        </div>
-        <div id="popular-routes" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-      </section>
-
-      <!-- LIVERY COLORS -->
-      <section class="mb-14">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="font-display text-lg font-bold text-[#000000] flex items-center gap-2.5">
-            <div class="w-7 h-7 bg-[#4da2ff] border-2 border-[#000000] shadow-brutal-sm rounded-full flex items-center justify-center">
-              <i data-lucide="palette" class="w-4 h-4 text-[#ffffff]"></i>
-            </div>
-            Warna Livery Angkot
-          </h2>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="bg-[#ffffff] border-2 border-[#000000] shadow-brutal-sm p-4 flex items-start gap-3 rounded-xl">
-            <div class="w-10 h-10 bg-[#ffd731] border-2 border-[#000000] shadow-brutal-sm rounded-full flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#000000"><rect x="2" y="8" width="20" height="10" rx="5"/><circle cx="7" cy="18" r="2.5"/><circle cx="17" cy="18" r="2.5"/></svg>
-            </div>
-            <div>
-              <p class="font-display text-sm font-bold text-[#000000]">Kuning</p>
-              <p class="font-body text-[11px] text-[#000]/50 mt-0.5">KPUM, Angkot Umum</p>
-              <p class="font-body text-[11px] text-[#000]/35 mt-1 leading-relaxed">Mayoritas angkot di Medan. Rute panjang menjangkau hampir seluruh kota. Paling sering kamu temui di jalan.</p>
-            </div>
-          </div>
-          <div class="bg-[#ffffff] border-2 border-[#000000] shadow-brutal-sm p-4 flex items-start gap-3 rounded-xl">
-            <div class="w-10 h-10 bg-[#4da2ff] border-2 border-[#000000] shadow-brutal-sm rounded-full flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#ffffff"><rect x="2" y="8" width="20" height="10" rx="5"/><circle cx="7" cy="18" r="2.5"/><circle cx="17" cy="18" r="2.5"/></svg>
-            </div>
-            <div>
-              <p class="font-display text-sm font-bold text-[#000000]">Biru</p>
-              <p class="font-body text-[11px] text-[#000]/50 mt-0.5">Medan Bus, NMT</p>
-              <p class="font-body text-[11px] text-[#000]/35 mt-1 leading-relaxed">Trayek koridor utama kota. Menghubungkan terminal besar dan area komersial. Rute umum untuk komuter.</p>
-            </div>
-          </div>
-          <div class="bg-[#ffffff] border-2 border-[#000000] shadow-brutal-sm p-4 flex items-start gap-3 rounded-xl">
-            <div class="w-10 h-10 bg-[#55db9c] border-2 border-[#000000] shadow-brutal-sm rounded-full flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#ffffff"><rect x="2" y="8" width="20" height="10" rx="5"/><circle cx="7" cy="18" r="2.5"/><circle cx="17" cy="18" r="2.5"/></svg>
-            </div>
-            <div>
-              <p class="font-display text-sm font-bold text-[#000000]">Hijau</p>
-              <p class="font-body text-[11px] text-[#000]/50 mt-0.5">Medan Mars, Morina</p>
-              <p class="font-body text-[11px] text-[#000]/35 mt-1 leading-relaxed">Melayani area perifer dan pinggiran kota. Cocok kalau kamu mau ke daerah yang agak jauh dari pusat.</p>
-            </div>
-          </div>
-          <div class="bg-[#ffffff] border-2 border-[#000000] shadow-brutal-sm p-4 flex items-start gap-3 rounded-xl">
-            <div class="w-10 h-10 bg-[#fb4903] border-2 border-[#000000] shadow-brutal-sm rounded-full flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#ffffff"><rect x="2" y="8" width="20" height="10" rx="5"/><circle cx="7" cy="18" r="2.5"/><circle cx="17" cy="18" r="2.5"/></svg>
-            </div>
-            <div>
-              <p class="font-display text-sm font-bold text-[#000000]">Merah</p>
-              <p class="font-body text-[11px] text-[#000]/50 mt-0.5">RMC, Mitra Transport</p>
-              <p class="font-body text-[11px] text-[#000]/35 mt-1 leading-relaxed">Trayek lintas kota dan antar-kawasan. Biasanya rute jarak jauh menghubungkan area strategis.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Lihat Semua Trayek -->
-      <section class="mb-6">
-        <a href="/semua-trayek" class="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-[#000000] shadow-brutal-sm font-display text-sm font-bold text-[#000000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all rounded-xl">
-          <i data-lucide="list" class="w-4 h-4 text-[#55db9c]"></i>
-          Lihat Semua 118 Trayek
-          <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
-      </section>
-
-    </div>
-  </main>
-
-  <!-- RESULT VIEW -->
-  <main data-view="result" class="hidden flex-col pt-6 pb-20 flex-1">
-    <div class="max-w-5xl mx-auto px-4">
-      <section class="mb-6">
-        <button onclick="switchView('home')" class="inline-flex items-center gap-2 text-sm font-medium text-[#000]/50 hover:text-[#000000] transition-colors mb-4">
-          <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          Kembali
-        </button>
-        <div id="results-container" class="space-y-4"></div>
-      </section>
-    </div>
-  </main>
-
-  <!-- TRACKING VIEW (DIPERBAIKI 100dvh) -->
-  <div data-view="tracking" class="hidden flex-col w-full h-[calc(100dvh-3.5rem)] sm:h-[calc(100dvh-4rem)] md:h-[calc(100dvh-5rem)] min-h-[calc(100dvh-3.5rem)] sm:min-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-5rem)] relative">
-    <div class="flex-1 relative w-full overflow-hidden bg-[#dceeff]">
-      <div id="tracking-map" class="absolute inset-0 w-full h-full z-0"></div>
-      
-      <!-- Tracking top bar -->
-      <div class="absolute top-0 left-0 right-0 z-[1000] p-3 sm:p-4 pointer-events-none">
-        <div class="bg-[#ffffff] border-2 border-[#000000] shadow-brutal p-2.5 sm:p-3 flex items-center gap-2 sm:gap-3 w-full max-w-lg mx-auto rounded-xl pointer-events-auto">
-          <button onclick="switchView(previousView)" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full border-2 border-[#000]/15 hover:border-[#000000] hover:bg-[#000]/5 transition-all shrink-0">
-            <i data-lucide="arrow-left" class="w-4 h-4 text-[#000000]"></i>
-          </button>
-          <div class="flex-1 min-w-0">
-            <p id="tracking-route-name" class="font-display text-xs sm:text-sm font-bold text-[#000000] truncate">Rute Angkot</p>
-            <p id="tracking-route-info" class="font-body text-[10px] sm:text-[11px] text-[#000]/40 truncate"></p>
-          </div>
-          <div id="tracking-status" class="flex items-center gap-1.5 px-2 py-1 bg-[#55db9c]/10 border-2 border-[#55db9c]/20 shrink-0 rounded-pill">
-            <span class="w-2 h-2 rounded-full bg-[#55db9c] animate-pulse"></span>
-            <span class="font-display text-[9px] sm:text-[10px] font-bold text-[#55db9c]">LIVE</span>
-          </div>
-        </div>
+        <figure class="home-photo">
+          <img src="/img/hero-angkot.jpg" alt="Deretan angkot berwarna oranye dan merah parkir di tepi jalan di Medan">
+          <figcaption>Nomor trayek ada di kaca depan. Warna badan menandai operatornya.</figcaption>
+        </figure>
       </div>
 
-      <!-- Tracking bottom panel -->
-      <div class="absolute bottom-0 left-0 right-0 z-[1000] p-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] pointer-events-none">
-        <div class="bg-[#ffffff] border-2 border-[#000000] shadow-brutal p-3 sm:p-4 w-full max-w-lg mx-auto rounded-xl pointer-events-auto">
-          <div class="flex items-center gap-2 sm:gap-3 mb-3">
-            <div id="tracking-user-icon" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#4da2ff] border-2 border-[#000000] flex items-center justify-center shrink-0">
-              <i data-lucide="navigation" class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-[#ffffff]"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p id="tracking-coords" class="font-display text-xs font-bold text-[#000000] truncate" data-i18n="tracking_searching">Mencari lokasi...</p>
-              <p id="tracking-speed" class="font-body text-[9px] sm:text-[11px] text-[#000]/40 truncate" data-i18n="tracking_monitoring">Memantau pergerakan</p>
-            </div>
-            <button id="tracking-center-btn" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full border-2 border-[#4da2ff]/20 hover:border-[#4da2ff] hover:bg-[#4da2ff]/5 transition-all shrink-0" title="Fokus ke lokasi saya">
-              <i data-lucide="locate" class="w-4 h-4 text-[#4da2ff]"></i>
-            </button>
+      <section class="wrap section">
+        <h2 data-i18n="popular_title">Rute Populer</h2>
+        <div class="popular" id="popular-routes"></div>
+        <p class="note" style="margin-top:1.25rem">Tercatat <span id="route-count-badge">118</span> trayek dan <span id="hero-stops-count">190</span> halte. <a href="/semua-trayek">Lihat semua trayek</a></p>
+      </section>
+    </div>
+
+    <div class="hidden" data-view="result">
+      <div class="wrap">
+        <div class="result-head">
+          <button type="button" class="link-btn" onclick="switchView('home')"><i data-lucide="arrow-left"></i>Cari rute lain</button>
+        </div>
+        <div class="results" id="results-container"></div>
+      </div>
+    </div>
+
+    <div class="hidden" data-view="tracking">
+      <div class="wrap track">
+        <div class="track-head">
+          <h1 id="tracking-route-name">Rute angkot</h1>
+          <p class="note" id="tracking-route-info"></p>
+        </div>
+        <div class="track-map" id="tracking-map"></div>
+        <div class="track-bar">
+          <div class="track-status">
+            <strong id="tracking-coords" data-i18n="tracking_searching">Mencari lokasi...</strong>
+            <span class="note" id="tracking-speed" data-i18n="tracking_monitoring">Memantau pergerakan</span>
           </div>
-          <div class="flex items-center gap-2">
-            <button id="tracking-stop-btn" class="flex-1 flex items-center justify-center gap-1 sm:gap-2 py-2 sm:py-2.5 bg-[#fb4903] border-2 border-[#000000] shadow-brutal-sm rounded-pill font-display text-[10px] sm:text-xs font-bold text-[#ffffff] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all">
-              <i data-lucide="square" class="w-3.5 h-3.5"></i> <span data-i18n="btn_stop_track">Berhenti</span>
-            </button>
-            <button id="tracking-follow-btn" class="flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#ffd731] border-2 border-[#000000] shadow-brutal-sm rounded-pill font-display text-[10px] sm:text-xs font-bold text-[#000000] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all">
-              <i data-lucide="crosshair" class="w-3.5 h-3.5"></i> <span data-i18n="btn_follow">Ikuti</span>
-            </button>
+          <div class="track-buttons">
+            <button type="button" class="btn btn-plain" id="tracking-center-btn"><i data-lucide="locate-fixed"></i>Ke posisi saya</button>
+            <button type="button" class="btn btn-plain" id="tracking-follow-btn" aria-pressed="true"><span data-i18n="btn_follow">Ikuti</span></button>
+            <button type="button" class="btn btn-danger" id="tracking-stop-btn"><span data-i18n="btn_stop_track">Berhenti</span></button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- FOOTER -->
-  <footer id="site-footer" class="mt-auto bg-[#000000] text-[#ffffff]">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-        <div class="sm:col-span-2 lg:col-span-1">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-              <img src="/logo.png" alt="AngkotMedan" class="w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20 object-contain" />
-            </div>
-            <div>
-              <p class="font-display text-sm font-bold">Angkot <span class="text-[#ffd731]">Medan</span></p>
-              <p class="font-body text-[10px] text-[#ffffff]/40">FINDER</p>
-            </div>
-          </div>
-          <p class="font-body text-xs text-[#ffffff]/40 leading-relaxed max-w-xs">Cari rute angkot di Medan dengan mudah. Gratis, cepat, dan akurat untuk semua warga Medan.</p>
-        </div>
-        <div>
-          <h4 class="font-display text-xs font-bold text-[#ffd731] uppercase tracking-wider mb-4">Data</h4>
-          <ul class="space-y-2.5">
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-1.5 h-1.5 rounded-full bg-[#ffd731]"></span> 118 Trayek</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-1.5 h-1.5 rounded-full bg-[#4da2ff]"></span> 190 Halte</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-1.5 h-1.5 rounded-full bg-[#55db9c]"></span> 15+ Operator</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-1.5 h-1.5 rounded-full bg-[#fb4903]"></span> 4 Warna Livery</li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-display text-xs font-bold text-[#4da2ff] uppercase tracking-wider mb-4">Livery</h4>
-          <ul class="space-y-2.5">
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-5 h-3 rounded-sm bg-[#ffd731] border border-[#ffffff]/20"></span> Kuning</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-5 h-3 rounded-sm bg-[#4da2ff] border border-[#ffffff]/20"></span> Biru</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-5 h-3 rounded-sm bg-[#55db9c] border border-[#ffffff]/20"></span> Hijau</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-5 h-3 rounded-sm bg-[#fb4903] border border-[#ffffff]/20"></span> Merah</li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-display text-xs font-bold text-[#55db9c] uppercase tracking-wider mb-4">Informasi</h4>
-          <ul class="space-y-2.5">
-            <li class="font-body text-sm text-[#ffffff]/50">Data dari komunitas</li>
-            <li class="font-body text-sm text-[#ffffff]/50">Bukan resmi Dishub</li>
-            <li class="font-body text-sm text-[#ffffff]/50">Open source</li>
-          </ul>
-        </div>
-      </div>
-      <div class="border-t border-[#ffffff]/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="font-body text-[11px] text-[#ffffff]/30">&copy; 2026 Angkot Medan Finder. Dibuat untuk komunitas Medan.</p>
-        <div class="flex items-center gap-3"></div>
-      </div>
+  <footer class="site-footer" id="site-footer">
+    <div class="wrap">
+      <span>AngkotMedan. Data dari sumber publik dan pengamatan lapangan, bukan layanan resmi Dishub Kota Medan.</span>
+      <a href="https://github.com/Ariefhuda/AngkotMedan">Kode sumber</a>
     </div>
   </footer>
 
-  <!-- ROUTE DETAIL MODAL -->
-  <div id="route-detail-modal" class="hidden fixed inset-0 z-[200] bg-[#000]/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-[#dceeff] w-full max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden border-2 border-[#000000] shadow-brutal rounded-t-2xl sm:rounded-2xl relative">
-      <button id="modal-close-btn" class="absolute top-4 right-4 z-10 w-8 h-8 bg-white border-2 border-[#000000] shadow-brutal-sm rounded-full flex items-center justify-center hover:bg-mustard/20 transition-colors">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-      <div id="modal-content"></div>
-    </div>
-  </div>
-
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
   <script src="/js/livery.js"></script>
   <script src="/js/app.js"></script>
 </body>

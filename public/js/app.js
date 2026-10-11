@@ -16,8 +16,8 @@ const I18N = {
     nav_home: 'Beranda',
     nav_about: 'Tentang',
     hero_location: 'Kota Medan, Sumatera Utara, Indonesia',
-    hero_title: 'Baru di Medan?<br><span class="text-[#ffd731] relative inline-block">Naik Angkot<svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg></span> Aja',
-    hero_subtitle: 'Baru datang ke Medan dan bingung naik angkot apa? Ketik asal & tujuan, langsung tahu rute yang tepat. Gratis, gak perlu tanya orang.',
+    hero_title: 'Baru di Medan? Naik Angkot Aja',
+    hero_subtitle: 'Ketik tempat asal dan tujuanmu. Kami tunjukkan angkot nomor berapa yang dinaiki, di mana naik, pindah, dan turun.',
     search_title: 'Cari Rute Angkot',
     label_origin: 'Dari mana?',
     label_dest: 'Mau ke mana?',
@@ -36,15 +36,15 @@ const I18N = {
     transfer_at: 'Pindah ke angkot lain di sini',
     stops: 'halte',
     explore_title: 'Semua Trayek Angkot',
-    explorer_desc: 'Lihat semua 118 trayek angkot di Medan. Klik kartu untuk lihat rute detail.',
+    explorer_desc: 'Semua trayek angkot Medan yang tercatat. Ketuk satu trayek untuk melihat halte dan petanya.',
     explorer_search: 'Cari nomor trayek atau nama operator...',
-    about_title: 'Tentang Angkot Medan Finder',
+    about_title: 'Tentang AngkotMedan',
     popular_title: 'Rute Populer',
     about_problem: 'Kenapa Sulit Naik Angkot di Medan?',
-    about_problem_desc: 'Medan punya 118 trayek angkot dengan 15+ operator berbeda. Gak ada peta rute resmi, gak ada aplikasi yang lengkap. Kalau baru pertama kali ke Medan, kamu pasti bingung: naik angkot mana? turun di mana? Berapa ongkosnya? Website ini bantu kamu temukan rute yang tepat tanpa harus tanya orang.',
+    about_problem_desc: 'Medan punya lebih dari seratus trayek angkot dari belasan operator. Tidak ada peta rute resmi dan tidak ada satu tempat yang memuat semuanya. Kalau baru pertama kali ke Medan, biasanya harus bertanya ke orang di jalan: naik angkot mana, turun di mana. Situs ini membantu mencarinya sendiri.',
     about_how: 'Cara Pakai',
     about_how1: 'Ketik Asal & Tujuan',
-    about_how1_desc: 'Ketik nama tempat, halte, atau landmark. Auto-suggest bantu kamu nemu nama yang tepat.',
+    about_how1_desc: 'Ketik nama tempat, halte, atau jalan, lalu pilih dari saran yang muncul.',
     about_how2: 'Lihat Rute',
     about_how2_desc: 'Sistem langsung kasih tahu angkot mana yang harus dinaiki, berapa kali pindah, dan turun di mana.',
     about_how3: 'Naik Angkot',
@@ -52,7 +52,7 @@ const I18N = {
     about_livery: 'Panduan Warna Livery',
     about_livery_desc: 'Setiap angkot punya warna berbeda sesuai operatornya. Kenali warnanya biar gak salah naik.',
     about_data: 'Tentang Data',
-    about_data_desc: 'Data 118 trayek dikumpulkan dari komunitas pengguna angkot di Medan. Bukan resmi Dishub, tapi bisa diandalkan untuk sehari-hari.',
+    about_data_desc: 'Data trayek dikumpulkan dari sumber publik dan pengamatan di lapangan. Ini bukan data resmi Dishub Kota Medan.',
     about_back: 'Beranda',
     tracking_searching: 'Mencari lokasi...',
     tracking_monitoring: 'Memantau pergerakan',
@@ -61,13 +61,13 @@ const I18N = {
     no_result_title: 'Gak ada rute ditemukan',
     no_result_desc: 'Coba pakai nama halte atau jalan yang lebih umum di sekitar lokasi awal dan tujuanmu.',
     btn_try_again: 'Coba lagi',
-    modal_stops: 'Daftar Halte & Waypoints'
+    modal_stops: 'Halte yang dilewati'
   },
   en: {
     nav_home: 'Home',
     nav_about: 'About',
     hero_location: 'Medan City, North Sumatra, Indonesia',
-    hero_title: 'New in Medan?<br><span class="text-[#ffd731] relative inline-block">Just Take<svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg></span> Angkot',
+    hero_title: 'New in Medan? Just Take Angkot',
     hero_subtitle: 'Just arrived in Medan and don\'t know which angkot to take? Type where you are and where you\'re going — we\'ll show you the exact route. Free, no need to ask anyone.',
     search_title: 'Find Angkot Route',
     label_origin: 'Where from?',
@@ -118,7 +118,7 @@ const I18N = {
     nav_home: 'Boru',
     nav_about: 'Angka na',
     hero_location: 'Kota Medan, Sumatera Utara',
-    hero_title: 'Parmodal di Medan?<br><span class="text-[#ffd731] relative inline-block">Numpak Angkot<svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg></span> Ro',
+    hero_title: 'Parmodal di Medan? Numpak Angkot Ro',
     hero_subtitle: 'Molo parmodal ho medan, sonang au numpak angkot na? Tulis asal ma tujunmu, langsung mantap rute na. Gratis, sonang mitanyaon orang.',
     search_title: 'Hiligar Rute Angkot',
     label_origin: 'Asalma?',
@@ -169,7 +169,7 @@ const I18N = {
     nav_home: 'Omah',
     nav_about: 'Babagan',
     hero_location: 'Kutha Medan, Sumatera Lor',
-    hero_title: 'Anyar tekan Medan?<br><span class="text-[#ffd731] relative inline-block">Numpak Angkot<svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg></span> Wae',
+    hero_title: 'Anyar tekan Medan? Numpak Angkot Wae',
     hero_subtitle: 'Tekan Medan durung ngerti numpak angkot apa? Tulis asal lan tujuan, langsung weruh rute sing bener. Gratis, ora perlu takon wong.',
     search_title: 'Golek Rute Angkot',
     label_origin: 'Saka endi?',
@@ -220,7 +220,7 @@ const I18N = {
     nav_home: 'Utama',
     nav_about: 'Tentang',
     hero_location: 'Kota Medan, Sumatera Utara, Indonesia',
-    hero_title: 'Baru di Medan?<br><span class="text-[#ffd731] relative inline-block">Naik Angkot<svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg></span> Saja',
+    hero_title: 'Baru di Medan? Naik Angkot Saja',
     hero_subtitle: 'Baru sampai di Medan dan tak tahu naik angkot apa? Taip asal & destinasi, terus tahu rute yang betul. Percuma, tak perlu tanya sesiapa.',
     search_title: 'Cari Rute Angkot',
     label_origin: 'Dari mana?',
@@ -271,7 +271,7 @@ const I18N = {
     nav_home: 'Baituo',
     nav_about: 'Tentang',
     hero_location: 'Kota Medan, Sumatera Barat',
-    hero_title: 'Baruah ka Medan?<br><span class="text-[#ffd731] relative inline-block">Naik Angkot<svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg></span> Jo',
+    hero_title: 'Baruah ka Medan? Naik Angkot Jo',
     hero_subtitle: 'Baruah ka Medan ka bingung angkot apa nan dinaiki? Tulis asal jo tujuan, langsung tuo rute nan bana. Gratis, taraso tagadang maraso orang.',
     search_title: 'Cariak Rute Angkot',
     label_origin: 'Dari mano?',
@@ -322,7 +322,7 @@ const I18N = {
     nav_home: 'Imah',
     nav_about: 'Ngeunaan',
     hero_location: 'Kota Medan, Sumatera Utara',
-    hero_title: 'Anyar ka Medan?<br><span class="text-[#ffd731] relative inline-block">Naik Angkot<svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg></span> Wae',
+    hero_title: 'Anyar ka Medan? Naik Angkot Wae',
     hero_subtitle: 'Anyar ka Medan teu nyaho naon angkot nu kedah dinaiki? Eusian asal jeung tujuan, langsung terang rute nu leres. Gratis, teu kudu nanya ka jalma.',
     search_title: 'Milarian Rute Angkot',
     label_origin: 'Ti mana?',
@@ -373,7 +373,7 @@ const I18N = {
     nav_home: 'U Keu Rumoh',
     nav_about: 'Tentang',
     hero_location: 'Kota Medan, Sumatera Utara',
-    hero_title: 'Baro Meugang di Medan?<br><span class="text-[#ffd731] relative inline-block">Naik Angkot<svg class="absolute -bottom-1 left-0 w-full" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000000" stroke-width="3" stroke-linecap="round"/></svg></span> Mantong',
+    hero_title: 'Baro Meugang di Medan? Naik Angkot Mantong',
     hero_subtitle: 'Baro datang ke Medan teu manyangka naik angkot naon? Tulis asal dan tujuan, lheuhna teu trouh ruteu nan jjé. Gratis, teu perlu manyangsa that peuhaba.',
     search_title: 'Ucap Rute Angkot',
     label_origin: 'Keu eman?',
@@ -430,11 +430,7 @@ function applyLang(lang) {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (trans[key]) {
-      if (key === 'hero_title') {
-        el.innerHTML = trans[key];
-      } else {
-        el.textContent = trans[key];
-      }
+      el.textContent = trans[key];
     }
   });
 
@@ -477,13 +473,9 @@ function getStopCoords(stopName) {
 }
 
 function getLiveryColor(warna) {
-  if (typeof LIVERY_COLORS !== 'undefined' && LIVERY_COLORS[warna]) {
-    return LIVERY_COLORS[warna];
-  }
-  return { bg: 'bg-amber-100', text: 'text-black', hex: '#ffd731', label: warna || 'Kuning' };
+  return LIVERY_COLORS[warna] || LIVERY_COLORS["-"];
 }
 
-// OSRM Road Snapping cache & fetch
 let osrmCache = {};
 const OSRM_URL = "https://router.project-osrm.org/route/v1/driving/";
 
@@ -544,9 +536,8 @@ function switchView(view) {
   document.querySelectorAll("[data-view]").forEach(el => {
     const isActive = el.dataset.view === view;
     el.classList.toggle("hidden", !isActive);
-    el.classList.toggle("flex", isActive);
   });
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0 });
   if (view === "tracking" && typeof trackingMap !== 'undefined' && trackingMap) {
     setTimeout(() => trackingMap.invalidateSize(), 200);
   }
@@ -646,7 +637,6 @@ function emptyResultMessage(result) {
   const from = escapeHtml(result.from.name), to = escapeHtml(result.to.name);
   if (result.reason === "walk") {
     return {
-      icon: "footprints",
       title: "Jalan kaki saja",
       body: `<strong>${from}</strong> dan <strong>${to}</strong> hanya berjarak sekitar ${formatMeters(result.meters)}, kira-kira ${result.minutes} menit jalan kaki. Tidak perlu naik angkot.`,
     };
@@ -655,7 +645,6 @@ function emptyResultMessage(result) {
     const place = result.reason === "no_stop_near_origin" ? from : to;
     const near = result.nearest;
     return {
-      icon: "map-pin-off",
       title: "Tidak ada halte angkot di dekat situ",
       body: `Dalam jarak 1 km dari <strong>${place}</strong> tidak ada halte yang tercatat. Halte terdekat adalah <strong>${escapeHtml(near.name)}</strong>, sekitar ${formatMeters(near.meters)} dari sana. Coba cari dari halte itu.`,
     };
@@ -673,44 +662,32 @@ function renderResults() {
   if (!searchResults) { container.innerHTML = ""; return; }
 
   const { from, to, itineraries } = searchResults;
-  const backBtn = `
-    <button onclick="switchView('home')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#ffd731] border-2 border-[#000000] shadow-brutal-sm rounded-pill font-display text-xs font-bold hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all">
-      <i data-lucide="arrow-left" class="w-4 h-4"></i> Cari rute lain
-    </button>`;
-
   let html = `
-    <div class="mb-6 bg-white border-2 border-[#000000] shadow-brutal p-5 rounded-2xl">
-      <p class="font-body text-xs text-[#000]/50 mb-1">${itineraries.length > 0 ? `${itineraries.length} pilihan rute, tercepat di atas` : "Hasil pencarian"}</p>
-      <p class="font-display text-lg sm:text-xl font-bold text-[#000000] leading-snug">
-        ${escapeHtml(from.name)}
-        <i data-lucide="arrow-right" class="w-4 h-4 inline mx-1 -mt-1"></i>
-        ${escapeHtml(to.name)}
-      </p>
+    <div>
+      <h1>${escapeHtml(from.name)} ke ${escapeHtml(to.name)}</h1>
+      <p class="note">${itineraries.length > 0 ? `${itineraries.length} pilihan rute, yang tercepat di atas.` : "Tidak ada rute angkot untuk perjalanan ini."}</p>
     </div>`;
 
   if (itineraries.length === 0) {
     const msg = emptyResultMessage(searchResults);
     html += `
-      <div class="bg-white border-2 border-[#000000] shadow-brutal p-6 sm:p-8 rounded-2xl">
-        <div class="w-12 h-12 bg-[#fb4903]/10 border-2 border-[#fb4903]/30 rounded-full flex items-center justify-center mb-4">
-          <i data-lucide="${msg.icon}" class="w-6 h-6 text-[#fb4903]"></i>
-        </div>
-        <h3 class="font-display text-lg font-bold text-[#000000] mb-2">${msg.title}</h3>
-        <p class="font-body text-sm text-[#000]/60 leading-relaxed mb-5 max-w-prose">${msg.body}</p>
-        ${backBtn}
+      <div class="empty">
+        <h2>${msg.title}</h2>
+        <p>${msg.body}</p>
+        <button type="button" class="btn" onclick="switchView('home')">Cari rute lain</button>
       </div>`;
   } else {
     html += itineraries.map((it, i) => renderItinerary(it, i)).join("");
-    html += `<p class="font-body text-xs text-[#000]/45 leading-relaxed max-w-prose">Waktu dan jarak adalah perkiraan dari posisi halte, bukan dari kondisi lalu lintas. Angkot tidak punya jadwal tetap, jadi waktu tunggu bisa lebih lama.</p>`;
+    html += `<p class="note">Waktu dan jarak adalah perkiraan dari posisi halte, bukan dari kondisi lalu lintas. Angkot tidak punya jadwal tetap, jadi waktu tunggu bisa lebih lama.</p>`;
   }
 
   container.innerHTML = html;
   lucide.createIcons();
-  applyLang(currentLang);
+
   // Peta dibuat saat kartunya dibuka, supaya pilihan yang tidak dilihat tidak ikut memuat peta.
-  container.querySelectorAll("details.itinerary").forEach(card => {
+  container.querySelectorAll("details.trip").forEach(card => {
     const showMap = () => {
-      const el = card.querySelector(".itinerary-map");
+      const el = card.querySelector(".trip-map");
       if (!card.open || el.dataset.ready) return;
       el.dataset.ready = "1";
       renderItineraryMap(el, itineraries[Number(card.dataset.index)]);
@@ -721,35 +698,29 @@ function renderResults() {
 }
 
 // Pelat nomor angkot dengan warna badannya: cara orang Medan mengenali angkot di jalan.
+// Angkot dua warna digambar terbelah miring.
 function platHtml(route, size = "md") {
   const livery = getLiveryColor(route.warna);
-  const dims = size === "lg" ? "min-w-[3.25rem] h-12 text-base px-2" : "min-w-[2.25rem] h-8 text-xs px-1.5";
-  return `<span class="inline-flex items-center justify-center ${dims} rounded-lg ${livery.bg} ${livery.text} border-2 border-[#000000] font-display font-black shadow-brutal-sm shrink-0">${escapeHtml(route.nomor)}</span>`;
+  const fill = livery.hex2
+    ? `linear-gradient(115deg, ${livery.hex} 0 70%, ${livery.hex2} 70% 100%)`
+    : livery.hex;
+  return `<span class="plat${size === "lg" ? " plat-lg" : ""}" style="background:${fill};color:${livery.ink}">${escapeHtml(route.nomor)}</span>`;
 }
 
 function renderItinerary(it, index) {
   const rides = it.legs.filter(l => l.type === "ride");
   const transferLabel = it.transfers === 0 ? "Langsung, tanpa pindah" : `${it.transfers} kali pindah angkot`;
-
-  const plates = rides.map(l => platHtml(l.route, "lg"))
-    .join(`<i data-lucide="chevron-right" class="w-4 h-4 text-[#000]/40 shrink-0"></i>`);
+  const plates = rides.map(l => platHtml(l.route, "lg")).join(`<i data-lucide="chevron-right"></i>`);
 
   const steps = it.legs.map((leg, i) => {
-    const isLast = i === it.legs.length - 1;
-    const line = isLast ? "" : `<div class="absolute left-[15px] top-9 bottom-0 w-[2px] bg-[#000]/10"></div>`;
-
     if (leg.type === "walk") {
-      const target = isLast
-        ? `ke tujuan, <strong class="text-[#000]">${escapeHtml(leg.to.name)}</strong>`
-        : `ke halte <strong class="text-[#000]">${escapeHtml(leg.to.name)}</strong>`;
+      const isLast = i === it.legs.length - 1;
+      const target = isLast ? `ke tujuan, <b>${escapeHtml(leg.to.name)}</b>` : `ke halte <b>${escapeHtml(leg.to.name)}</b>`;
       return `
-        <li class="relative pl-12 pb-6">
-          ${line}
-          <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-white border-2 border-[#000000] flex items-center justify-center">
-            <i data-lucide="footprints" class="w-4 h-4 text-[#000]"></i>
-          </div>
-          <p class="font-body text-sm text-[#000]/75 leading-relaxed pt-1">Jalan kaki sekitar <strong class="text-[#000]">${formatMeters(leg.meters)}</strong> ${target}.</p>
-          <p class="font-body text-xs text-[#000]/45 mt-0.5">Kira-kira ${leg.minutes} menit</p>
+        <li class="step step-walk">
+          <span class="step-mark"><i data-lucide="footprints"></i></span>
+          Jalan kaki sekitar <b>${formatMeters(leg.meters)}</b> ${target}.
+          <small>Kira-kira ${leg.minutes} menit</small>
         </li>`;
     }
 
@@ -757,63 +728,43 @@ function renderItinerary(it, index) {
     const isTransfer = rides.indexOf(leg) > 0;
     const passed = leg.stops.slice(1, -1);
     const passedHtml = passed.length === 0 ? "" : `
-      <details class="mt-2">
-        <summary class="font-body text-xs text-[#4da2ff] font-semibold cursor-pointer">Lewat ${passed.length} halte</summary>
-        <ol class="mt-1.5 space-y-1 font-body text-xs text-[#000]/55 list-decimal list-inside">
-          ${passed.map(s => `<li>${escapeHtml(s.name)}</li>`).join("")}
-        </ol>
-      </details>`;
+          <details>
+            <summary>Lewat ${passed.length} halte</summary>
+            <ol>${passed.map(s => `<li>${escapeHtml(s.name)}</li>`).join("")}</ol>
+          </details>`;
     return `
-      <li class="relative pl-12 pb-6">
-        ${line}
-        <div class="absolute left-0 top-0 w-8 h-8 rounded-full border-2 border-[#000000] flex items-center justify-center" style="background:${livery.hex}">
-          <i data-lucide="bus-front" class="w-4 h-4 ${livery.text}"></i>
-        </div>
-        <p class="font-body text-xs font-semibold text-[#000]/45 pt-0.5">${isTransfer ? "Pindah angkot di" : "Naik di"} ${escapeHtml(leg.board.name)}</p>
-        <p class="font-body text-sm text-[#000]/75 leading-relaxed mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-          ${platHtml(leg.route)}
-          <span><strong class="text-[#000]">Angkot ${escapeHtml(leg.route.nomor)}</strong> warna ${escapeHtml(livery.label).toLowerCase()}, arah <strong class="text-[#000]">${escapeHtml(leg.towards)}</strong></span>
-        </p>
-        <p class="font-body text-sm text-[#000]/75 leading-relaxed mt-1.5">Turun di <strong class="text-[#000]">${escapeHtml(leg.alight.name)}</strong>, ${leg.stopCount === 1 ? "halte berikutnya" : `halte ke-${leg.stopCount} setelah naik`}.</p>
-        <p class="font-body text-xs text-[#000]/45 mt-0.5">${escapeHtml(leg.route.operator)}, sekitar ${formatMeters(leg.km * 1000)}, kira-kira ${formatMinutes(leg.minutes)}</p>
-        ${passedHtml}
-      </li>`;
+        <li class="step">
+          <span class="step-mark"><i data-lucide="bus-front"></i></span>
+          <span class="step-label">${isTransfer ? "Pindah angkot di" : "Naik di"} ${escapeHtml(leg.board.name)}</span>
+          <div class="step-ride">${platHtml(leg.route)}<span>Angkot <b>${escapeHtml(leg.route.nomor)}</b> warna ${escapeHtml(livery.label).toLowerCase()}, arah <b>${escapeHtml(leg.towards)}</b></span></div>
+          Turun di <b>${escapeHtml(leg.alight.name)}</b>, ${leg.stopCount === 1 ? "halte berikutnya" : `halte ke-${leg.stopCount} setelah naik`}.
+          <small>${escapeHtml(leg.route.operator)}, sekitar ${formatMeters(leg.km * 1000)}, kira-kira ${formatMinutes(leg.minutes)}</small>${passedHtml}
+        </li>`;
   }).join("");
 
   // Pilihan tercepat langsung terbuka. Pilihan lain cukup ringkasannya; langkah dan petanya dibuka kalau diketuk.
   return `
-    <details class="itinerary bg-white border-2 border-[#000000] shadow-brutal rounded-2xl overflow-hidden" data-index="${index}" ${index === 0 ? "open" : ""}>
-      <summary class="p-4 sm:p-6 flex flex-wrap items-center gap-x-5 gap-y-3 cursor-pointer list-none">
-        <div class="flex items-center gap-2 flex-wrap">${plates}</div>
-        <div class="ml-auto text-right">
-          <p class="font-display text-xl sm:text-2xl font-black text-[#000000] leading-none">± ${formatMinutes(it.minutes)}</p>
-          <p class="font-body text-xs text-[#000]/55 mt-1">${transferLabel}${it.walkMeters > 0 ? `, jalan kaki ${formatMeters(it.walkMeters)}` : ""}</p>
+    <details class="trip" data-index="${index}" ${index === 0 ? "open" : ""}>
+      <summary>
+        <div class="trip-plates">${plates}</div>
+        <div class="trip-time">± ${formatMinutes(it.minutes)}</div>
+        <div class="trip-meta">
+          <span>${index === 0 ? `<span class="best">Paling cepat.</span> ` : ""}${transferLabel}${it.walkMeters > 0 ? `, jalan kaki ${formatMeters(it.walkMeters)}` : ""}</span>
+          <span class="trip-toggle"></span>
         </div>
-        <p class="w-full flex items-center justify-between font-body text-xs font-semibold">
-          <span class="text-[#1a7f4f]">${index === 0 ? "Paling cepat dari semua pilihan" : ""}</span>
-          <span class="itinerary-toggle text-[#4da2ff]"></span>
-        </p>
       </summary>
-
-      <div class="px-4 sm:px-6 pt-1 border-t-2 border-[#000000]/10"></div>
-      <div class="px-4 sm:px-6 pt-4">
-        <div class="itinerary-map w-full h-48 sm:h-56 border-2 border-[#000000] rounded-xl overflow-hidden" data-index="${index}"></div>
-      </div>
-
-      <ol class="px-4 sm:px-6 pt-5">
-        ${steps}
-        <li class="relative pl-12 pb-5">
-          <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-[#fb4903] border-2 border-[#000000] flex items-center justify-center">
-            <i data-lucide="flag" class="w-4 h-4 text-white"></i>
-          </div>
-          <p class="font-display text-sm font-bold text-[#000000] pt-1.5">Sampai di ${escapeHtml(searchResults.to.name)}</p>
-        </li>
-      </ol>
-
-      <div class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <button class="track-route-btn w-full py-3 bg-[#4da2ff] text-white font-display font-bold text-xs rounded-xl border-2 border-[#000000] shadow-brutal-sm hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all flex items-center justify-center gap-2" data-index="${index}">
-          <i data-lucide="navigation" class="w-4 h-4"></i> Pantau posisi saya di rute ini
-        </button>
+      <div class="trip-body">
+        <div class="trip-map" data-index="${index}"></div>
+        <ol class="steps">
+          ${steps}
+          <li class="step step-end">
+            <span class="step-mark"><i data-lucide="flag"></i></span>
+            <b>Sampai di ${escapeHtml(searchResults.to.name)}</b>
+          </li>
+        </ol>
+        <div class="trip-actions">
+          <button type="button" class="btn track-route-btn" data-index="${index}"><i data-lucide="navigation"></i>Pantau posisi saya di rute ini</button>
+        </div>
       </div>
     </details>`;
 }
@@ -828,32 +779,35 @@ function baseTiles() {
 }
 
 // Gambar satu rute di peta: garis putus-putus untuk jalan kaki, garis tebal berwarna angkot untuk tiap angkot.
+const INK = "#14202b";
+const STOP_RED = "#c8372d";
+
 function drawItinerary(map, it) {
   const bounds = [];
   it.legs.forEach(leg => {
     if (leg.type === "walk") {
       const coords = [leg.from.coord, leg.to.coord];
-      L.polyline(coords, { color: "#000000", weight: 3, opacity: 0.7, dashArray: "2 8" }).addTo(map);
+      L.polyline(coords, { color: INK, weight: 3, opacity: 0.7, dashArray: "2 8" }).addTo(map);
       bounds.push(...coords);
       return;
     }
     const coords = leg.stops.map(s => s.coord);
     const livery = getLiveryColor(leg.route.warna);
-    const outline = L.polyline(coords, { color: "#000000", weight: 8, opacity: 0.9 }).addTo(map);
+    const outline = L.polyline(coords, { color: INK, weight: 8, opacity: 0.9 }).addTo(map);
     const line = L.polyline(coords, { color: livery.hex, weight: 4, opacity: 1 }).addTo(map);
     // Garis lurus antarhalte diganti garis yang mengikuti jalan begitu OSRM menjawab.
     fetchRoadGeometry(coords).then(road => {
       if (road.length > 2) { outline.setLatLngs(road); line.setLatLngs(road); }
     }).catch(() => {});
-    L.circleMarker(leg.board.coord, { radius: 6, fillColor: "#ffffff", color: "#000000", weight: 2, fillOpacity: 1 })
+    L.circleMarker(leg.board.coord, { radius: 6, fillColor: "#ffffff", color: INK, weight: 2, fillOpacity: 1 })
       .bindTooltip(`Naik ${leg.route.nomor}: ${leg.board.name}`).addTo(map);
-    L.circleMarker(leg.alight.coord, { radius: 6, fillColor: "#ffffff", color: "#000000", weight: 2, fillOpacity: 1 })
+    L.circleMarker(leg.alight.coord, { radius: 6, fillColor: "#ffffff", color: INK, weight: 2, fillOpacity: 1 })
       .bindTooltip(`Turun: ${leg.alight.name}`).addTo(map);
     bounds.push(...coords);
   });
   const start = bounds[0], end = bounds[bounds.length - 1];
-  L.circleMarker(start, { radius: 8, fillColor: "#55db9c", color: "#000000", weight: 2, fillOpacity: 1 }).bindTooltip("Asal").addTo(map);
-  L.circleMarker(end, { radius: 8, fillColor: "#fb4903", color: "#000000", weight: 2, fillOpacity: 1 }).bindTooltip("Tujuan").addTo(map);
+  L.circleMarker(start, { radius: 8, fillColor: "#ffffff", color: INK, weight: 2, fillOpacity: 1 }).bindTooltip("Asal").addTo(map);
+  L.circleMarker(end, { radius: 8, fillColor: STOP_RED, color: INK, weight: 2, fillOpacity: 1 }).bindTooltip("Tujuan").addTo(map);
   return L.latLngBounds(bounds);
 }
 
@@ -874,14 +828,8 @@ function renderPopularRoutes() {
   if (!container) return;
 
   container.innerHTML = POPULAR_ROUTES.map(r => `
-    <button type="button" class="popular-btn bg-white border-2 border-[#000000] shadow-brutal-sm p-3.5 text-left rounded-xl hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-brutal transition-all flex items-center justify-between group" data-from="${escapeHtml(r.from)}" data-to="${escapeHtml(r.to)}">
-      <div class="min-w-0 pr-2">
-        <p class="font-body text-xs font-bold text-[#000000] truncate">${escapeHtml(r.from)}</p>
-        <p class="font-body text-[11px] text-[#000]/40 truncate mt-0.5">ke ${escapeHtml(r.to)}</p>
-      </div>
-      <div class="w-7 h-7 bg-[#ffd731]/20 border border-[#000000]/20 rounded-full flex items-center justify-center shrink-0 group-hover:bg-[#ffd731] group-hover:border-[#000000] transition-colors">
-        <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-[#000000]"></i>
-      </div>
+    <button type="button" class="popular-btn" data-from="${escapeHtml(r.from)}" data-to="${escapeHtml(r.to)}">
+      <b>${escapeHtml(r.from)}</b><span>ke</span><b>${escapeHtml(r.to)}</b>
     </button>
   `).join("");
 
@@ -894,7 +842,6 @@ function renderPopularRoutes() {
       performSearch();
     });
   });
-  lucide.createIcons();
 }
 
 // Saran saat mengetik: halte angkot dan tempat umum (mal, kampus, rumah sakit) dari server.
@@ -923,12 +870,9 @@ function setupSuggestions(inputEl, hiddenEl, listEl) {
       if (places.length === 0) { close(); return; }
 
       listEl.innerHTML = places.map((p, i) => `
-        <button type="button" class="sugg-item w-full text-left px-4 py-2.5 font-body hover:bg-[#4da2ff]/10 focus:bg-[#4da2ff]/10 focus:outline-none border-b border-[#000]/5 last:border-0 flex items-center gap-2.5" data-index="${i}">
-          <i data-lucide="${p.type === "halte" ? "bus-front" : "map-pin"}" class="w-4 h-4 ${p.type === "halte" ? "text-[#000]" : "text-[#4da2ff]"} shrink-0"></i>
-          <span class="min-w-0">
-            <span class="block text-xs font-semibold text-[#000] truncate">${escapeHtml(p.name)}</span>
-            <span class="block text-[11px] text-[#000]/45 truncate">${escapeHtml(p.detail)}</span>
-          </span>
+        <button type="button" class="sugg-item" data-index="${i}">
+          <i data-lucide="${p.type === "halte" ? "bus-front" : "map-pin"}"></i>
+          <span><strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.detail)}</small></span>
         </button>
       `).join("");
       listEl.classList.remove("hidden");
@@ -976,155 +920,96 @@ function renderRouteExplorer() {
   explorerPage = Math.min(explorerPage, Math.max(1, totalPages));
   const pageRoutes = filtered.slice((explorerPage - 1) * EXPLORER_PAGE_SIZE, explorerPage * EXPLORER_PAGE_SIZE);
 
-  if (countEl) countEl.textContent = `Menampilkan ${pageRoutes.length} dari ${filtered.length} trayek`;
-
-  if (pageRoutes.length === 0) {
-    container.innerHTML = `<div class="col-span-full text-center py-12 font-display text-sm text-[#000]/40">Gak ada trayek yang cocok</div>`;
-    renderExplorerPagination(totalPages);
-    return;
+  if (countEl) {
+    countEl.textContent = filtered.length === 0
+      ? "Tidak ada trayek yang cocok. Coba nomor atau nama operator lain."
+      : `${filtered.length} trayek`;
   }
 
-  container.innerHTML = pageRoutes.map(r => {
-    const livery = getLiveryColor(r.warna);
-    return `
-      <div class="explorer-card bg-white border-2 border-[#000000] shadow-brutal p-4 rounded-2xl hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutal-lg transition-all cursor-pointer flex flex-col justify-between" data-route-id="${r.id}">
-        <div>
-          <div class="flex items-start gap-3 mb-3">
-            <div class="w-12 h-12 rounded-xl ${livery.bg} ${livery.text} border-2 border-[#000000] font-display font-black text-sm flex items-center justify-center shadow-brutal-sm shrink-0">
-              ${r.nomor}
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="font-body text-xs font-bold text-[#000000] truncate">${r.asal}</p>
-              <div class="flex items-center gap-1 my-0.5">
-                <i data-lucide="arrow-down" class="w-3 h-3 text-[#4da2ff]"></i>
-              </div>
-              <p class="font-body text-xs font-bold text-[#000000] truncate">${r.tujuan}</p>
-            </div>
-          </div>
-        </div>
-        <div class="pt-3 border-t border-[#000]/8 flex items-center justify-between text-[11px] font-body text-[#000]/50">
-          <span class="truncate pr-2">${r.operator}</span>
-          <span class="shrink-0 font-bold">${r.waypoints.length} halte</span>
-        </div>
-      </div>
-    `;
-  }).join("");
+  container.innerHTML = pageRoutes.map(r => `
+    <button type="button" class="route-row" data-route-id="${escapeHtml(r.id)}">
+      ${platHtml(r, "lg")}
+      <b>${escapeHtml(r.asal)} ke ${escapeHtml(r.tujuan)}</b>
+      <small>${escapeHtml(r.operator)}, ${r.pp ? "pulang-pergi" : "satu arah"}</small>
+      <small class="count">${r.waypoints.length} titik</small>
+    </button>
+  `).join("");
 
-  container.querySelectorAll(".explorer-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const route = ANGKOT_ROUTES.find(r => r.id === card.dataset.routeId);
+  container.querySelectorAll(".route-row").forEach(row => {
+    row.addEventListener("click", () => {
+      const route = ANGKOT_ROUTES.find(r => r.id === row.dataset.routeId);
       if (route) openRouteDetail(route);
     });
   });
 
   renderExplorerPagination(totalPages);
-  lucide.createIcons();
 }
 
-function handleExplorerSearch(e) {
+function handleExplorerSearch() {
   explorerPage = 1;
   renderRouteExplorer();
 }
 
 function renderExplorerPagination(totalPages) {
   const el = document.getElementById("explorer-pagination");
-  if (!el || totalPages <= 1) { if (el) el.innerHTML = ""; return; }
+  if (!el) return;
+  if (totalPages <= 1) { el.innerHTML = ""; return; }
 
-  let html = `<button class="page-btn px-3 py-1.5 border-2 border-[#000000]/20 rounded-lg font-display text-xs font-bold ${explorerPage === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-[#4da2ff]/10 hover:border-[#000000]'}" data-page="${explorerPage - 1}" ${explorerPage === 1 ? 'disabled' : ''}>&larr;</button>`;
-  
+  let html = `<button type="button" class="page-btn" data-page="${explorerPage - 1}" ${explorerPage === 1 ? "disabled" : ""}>Sebelumnya</button>`;
   for (let i = 1; i <= totalPages; i++) {
     if (i === 1 || i === totalPages || (i >= explorerPage - 1 && i <= explorerPage + 1)) {
-      const isActive = i === explorerPage;
-      html += `<button class="page-btn w-8 h-8 border-2 rounded-lg font-display text-xs font-bold ${isActive ? 'bg-[#ffd731] border-[#000000] shadow-brutal-sm' : 'border-[#000000]/20 hover:border-[#000000]'}" data-page="${i}">${i}</button>`;
+      html += `<button type="button" class="page-btn" data-page="${i}" ${i === explorerPage ? 'aria-current="page"' : ""}>${i}</button>`;
     } else if (i === explorerPage - 2 || i === explorerPage + 2) {
-      html += `<span class="text-xs text-[#000]/40">...</span>`;
+      html += `<span aria-hidden="true">…</span>`;
     }
   }
-
-  html += `<button class="page-btn px-3 py-1.5 border-2 border-[#000000]/20 rounded-lg font-display text-xs font-bold ${explorerPage === totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:bg-[#4da2ff]/10 hover:border-[#000000]'}" data-page="${explorerPage + 1}" ${explorerPage === totalPages ? 'disabled' : ''}>&rarr;</button>`;
-
+  html += `<button type="button" class="page-btn" data-page="${explorerPage + 1}" ${explorerPage === totalPages ? "disabled" : ""}>Berikutnya</button>`;
   el.innerHTML = html;
+
   el.querySelectorAll(".page-btn:not([disabled])").forEach(btn => {
     btn.addEventListener("click", () => {
-      explorerPage = parseInt(btn.dataset.page);
+      explorerPage = parseInt(btn.dataset.page, 10);
       renderRouteExplorer();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      document.getElementById("route-explorer").scrollIntoView({ block: "start" });
     });
   });
 }
 
 function openRouteDetail(route) {
   const modal = document.getElementById("route-detail-modal");
-  const titleEl = document.getElementById("modal-route-title");
-  const statsEl = document.getElementById("modal-stats");
-  const stopsEl = document.getElementById("modal-stops");
-  const searchBtn = document.getElementById("modal-search-btn");
   if (!modal) return;
-
   const wps = route.waypoints;
   const livery = getLiveryColor(route.warna);
 
-  if (titleEl) titleEl.textContent = `Angkot #${route.nomor} — ${route.operator}`;
-  if (statsEl) {
-    statsEl.innerHTML = `
-      <div class="bg-white border-2 border-[#000000] shadow-brutal-sm p-3 rounded-xl text-center">
-        <p class="font-display text-base sm:text-lg font-black text-[#000000]">${wps.length}</p>
-        <p class="font-body text-[10px] text-[#000]/40 uppercase">Halte</p>
-      </div>
-      <div class="bg-white border-2 border-[#000000] shadow-brutal-sm p-3 rounded-xl text-center">
-        <p class="font-display text-base sm:text-lg font-black text-[#4da2ff]">${route.warna}</p>
-        <p class="font-body text-[10px] text-[#000]/40 uppercase">Livery</p>
-      </div>
-      <div class="bg-white border-2 border-[#000000] shadow-brutal-sm p-3 rounded-xl text-center">
-        <p class="font-display text-base sm:text-lg font-black text-[#55db9c]">${route.pp ? 'PP' : 'Satu Arah'}</p>
-        <p class="font-body text-[10px] text-[#000]/40 uppercase">Trayek</p>
-      </div>
-    `;
-  }
-
-  if (stopsEl) {
-    stopsEl.innerHTML = wps.map((wp, i) => {
-      const isFirst = i === 0;
-      const isLast = i === wps.length - 1;
-      const dotBg = isFirst ? 'bg-[#55db9c]' : isLast ? 'bg-[#fb4903]' : 'bg-white border-2 border-[#000000]/30';
-      return `
-        <div class="flex items-center gap-3 relative py-1">
-          <div class="w-6 h-6 ${dotBg} border-2 border-[#000000] rounded-full flex items-center justify-center shrink-0 z-10">
-            ${isFirst ? '<div class="w-2 h-2 rounded-full bg-white"></div>' : isLast ? '<div class="w-2 h-2 rounded-full bg-white"></div>' : ''}
-          </div>
-          <p class="font-body text-xs ${isFirst || isLast ? 'font-bold text-[#000000]' : 'text-[#000]/60'} truncate">${wp}</p>
-        </div>
-      `;
-    }).join("");
-  }
-
-  if (searchBtn) {
-    searchBtn.onclick = () => {
-      window.location.href = `/?origin=${encodeURIComponent(route.asal)}&dest=${encodeURIComponent(route.tujuan)}`;
-    };
-  }
+  document.getElementById("modal-route-title").innerHTML = `${platHtml(route, "lg")} ${escapeHtml(route.asal)} ke ${escapeHtml(route.tujuan)}`;
+  document.getElementById("modal-stats").textContent =
+    `${route.operator}. Warna ${livery.label.toLowerCase()}, ${route.pp ? "pulang-pergi" : "satu arah"}, ${wps.length} titik tercatat.`;
+  document.getElementById("modal-stops").innerHTML = wps.map(wp => `<li>${escapeHtml(wp)}</li>`).join("");
+  document.getElementById("modal-search-btn").onclick = () => {
+    window.location.href = `/?origin=${encodeURIComponent(route.asal)}&dest=${encodeURIComponent(route.tujuan)}`;
+  };
 
   modal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
 
   requestAnimationFrame(() => {
     const mapEl = document.getElementById("modal-map");
-    if (!mapEl) return;
     if (modalMap) { modalMap.remove(); modalMap = null; }
-    
     modalMap = L.map(mapEl, { zoomControl: false, attributionControl: true, scrollWheelZoom: false });
     baseTiles().addTo(modalMap);
-    
-    const validCoords = wps.map(wp => getStopCoords(wp)).filter(Boolean);
-    if (validCoords.length >= 2) {
-      const straightLine = L.polyline(validCoords, { color: '#000000', weight: 4, opacity: 0.8 }).addTo(modalMap);
-      validCoords.forEach((c, i) => {
-        if (i === 0 || i === validCoords.length - 1) {
-          L.circleMarker(c, { radius: 6, fillColor: i === 0 ? '#55db9c' : '#fb4903', color: '#000', weight: 2, fillOpacity: 1 }).addTo(modalMap);
-        }
-      });
-      modalMap.fitBounds(validCoords, { padding: [30, 30] });
-      upgradeToRoadGeometry(modalMap, straightLine, validCoords);
+
+    const coords = wps.map(wp => getStopCoords(wp)).filter(Boolean);
+    if (coords.length >= 2) {
+      const outline = L.polyline(coords, { color: INK, weight: 8, opacity: 0.9 }).addTo(modalMap);
+      const line = L.polyline(coords, { color: livery.hex, weight: 4 }).addTo(modalMap);
+      L.circleMarker(coords[0], { radius: 7, fillColor: "#ffffff", color: INK, weight: 2, fillOpacity: 1 }).addTo(modalMap);
+      L.circleMarker(coords[coords.length - 1], { radius: 7, fillColor: STOP_RED, color: INK, weight: 2, fillOpacity: 1 }).addTo(modalMap);
+      modalMap.fitBounds(coords, { padding: [30, 30] });
+      fetchRoadGeometry(coords).then(road => {
+        if (road.length > 2) { outline.setLatLngs(road); line.setLatLngs(road); }
+      }).catch(() => {});
+    } else {
+      modalMap.setView([3.5950, 98.6700], 12);
     }
     setTimeout(() => modalMap.invalidateSize(), 200);
   });
@@ -1326,8 +1211,7 @@ async function initApp() {
   if (followBtn) {
     followBtn.addEventListener("click", () => {
       trackingFollowMode = !trackingFollowMode;
-      followBtn.classList.toggle('bg-[#ffd731]', trackingFollowMode);
-      followBtn.classList.toggle('bg-white', !trackingFollowMode);
+      followBtn.setAttribute('aria-pressed', String(trackingFollowMode));
     });
   }
 
@@ -1348,20 +1232,6 @@ async function initApp() {
     document.getElementById("origin-input").value = qOrigin;
     document.getElementById("dest-input").value = qDest;
     performSearch();
-  }
-
-  const navbar = document.getElementById("site-navbar");
-  if (navbar) {
-    let ticking = false;
-    window.addEventListener("scroll", () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          navbar.style.boxShadow = window.scrollY > 4 ? "0 4px 20px rgba(0,0,0,0.12)" : "none";
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
   }
 }
 

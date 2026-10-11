@@ -1,639 +1,266 @@
-/* ===== SLUSH DESIGN SYSTEM — Angkot Medan ===== */
+/* AngkotMedan
+   Bahasa visualnya diambil dari jalanan: papan penunjuk arah hijau, pelat nomor angkot
+   berwarna badan kendaraan, aspal dan beton. Huruf Barlow diturunkan dari huruf rambu jalan. */
 
-/* --- Global --- */
+:root {
+  --ink: #14202b;        /* aspal */
+  --ground: #edeff1;     /* beton */
+  --paper: #ffffff;
+  --sign: #0c6b45;       /* papan penunjuk arah */
+  --sign-deep: #08543a;
+  --angkot: #f7c600;     /* kuning angkot */
+  --stop: #c8372d;       /* tujuan, peringatan */
+  --muted: #5b6770;
+  --line: #cbd2d8;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --text: "Barlow", system-ui, sans-serif;
+  --page: 68rem;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
-
-html {
-  min-height: 100dvh;
-  overflow-x: hidden;
-}
+html { -webkit-text-size-adjust: 100%; }
 body {
-  min-height: 100dvh;
-  overflow-x: hidden;
-}
-body.tracking-active {
-  overflow: hidden;
-  height: 100dvh;
-}
-
-.slush-canvas {
-  background-color: #dceeff;
-  background-image:
-    radial-gradient(circle at 15% 20%, #ffd73120 0%, transparent 50%),
-    radial-gradient(circle at 85% 60%, #4da2ff15 0%, transparent 50%),
-    radial-gradient(circle at 50% 90%, #55db9c12 0%, transparent 40%);
-}
-
-[data-view="home"],
-[data-view="result"],
-[data-view="about"],
-[data-view="tracking"], 
-[data-view="explorer"] {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--text);
+  font-size: 1rem;
+  line-height: 1.55;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
-[data-view="home"].hidden,
-[data-view="result"].hidden,
-[data-view="about"].hidden,
-[data-view="tracking"].hidden,
-[data-view="explorer"].hidden {
-  display: none;
+main { flex: 1; }
+img { max-width: 100%; display: block; }
+a { color: var(--sign); text-underline-offset: 0.18em; }
+a:hover { color: var(--sign-deep); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.08; margin: 0; letter-spacing: 0.005em; }
+h1 { font-size: clamp(2.25rem, 6vw, 3.5rem); }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.3rem; }
+p { margin: 0; }
+ol, ul { margin: 0; padding: 0; list-style: none; }
+.hidden { display: none !important; }
+:focus-visible { outline: 3px solid var(--angkot); outline-offset: 2px; }
+svg.lucide { width: 1.1em; height: 1.1em; flex-shrink: 0; }
+
+.wrap { width: 100%; max-width: var(--page); margin: 0 auto; padding: 0 1.25rem; }
+.section { padding-block: 2.5rem; }
+.lede { font-size: 1.125rem; max-width: 38rem; }
+.note { color: var(--muted); font-size: 0.9rem; max-width: 40rem; }
+
+/* ---------- Bilah atas ---------- */
+.site-header { background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 500; }
+.site-header .wrap { display: flex; align-items: center; gap: 1.25rem; min-height: 3.75rem; }
+.brand { display: flex; align-items: center; gap: 0.6rem; color: var(--ink); text-decoration: none; font-family: var(--display); font-weight: 700; font-size: 1.4rem; }
+.brand img { width: 2.25rem; height: 2.25rem; object-fit: contain; }
+.site-nav { margin-left: auto; display: flex; align-items: center; gap: 0.25rem; }
+.site-nav a { color: var(--ink); text-decoration: none; font-weight: 500; padding: 0.5rem 0.7rem; border-radius: 4px; }
+.site-nav a:hover { background: var(--ground); }
+.site-nav a[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--angkot); border-radius: 0; }
+.lang { position: relative; }
+.lang-toggle { display: flex; align-items: center; gap: 0.35rem; background: none; border: 1px solid var(--line); border-radius: 4px; padding: 0.4rem 0.6rem; font-weight: 600; }
+.lang-menu { position: absolute; right: 0; top: calc(100% + 0.4rem); background: var(--paper); border: 1px solid var(--ink); border-radius: 6px; min-width: 10rem; padding: 0.3rem; z-index: 600; }
+.lang-option { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 0.5rem 0.65rem; border-radius: 4px; }
+.lang-option:hover { background: var(--ground); }
+
+/* ---------- Tombol ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: 2px solid var(--ink); background: var(--paper); border-radius: 6px; padding: 0.7rem 1.1rem; font-weight: 600; text-decoration: none; color: var(--ink); line-height: 1.2; }
+.btn:hover { background: var(--ground); color: var(--ink); }
+.btn-go { background: var(--angkot); width: 100%; font-family: var(--display); font-size: 1.35rem; padding: 0.8rem 1.1rem; }
+.btn-go:hover { background: #ffd51f; }
+.btn-plain { border-color: var(--line); font-weight: 500; }
+.btn-danger { background: var(--stop); border-color: var(--stop); color: #fff; }
+.btn-danger:hover { background: #ac2c23; color: #fff; }
+.btn[aria-pressed="true"] { background: var(--angkot); }
+.link-btn { background: none; border: 0; padding: 0; color: var(--sign); font-weight: 600; text-decoration: underline; text-underline-offset: 0.18em; display: inline-flex; align-items: center; gap: 0.35rem; }
+
+/* ---------- Pelat nomor angkot ---------- */
+.plat {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 2.6rem; height: 1.9rem; padding: 0 0.45rem;
+  font-family: var(--display); font-weight: 700; font-size: 1.15rem; line-height: 1;
+  border: 2px solid var(--ink); border-radius: 4px; flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.plat-lg { min-width: 3.6rem; height: 2.6rem; font-size: 1.6rem; }
+
+/* ---------- Beranda: papan penunjuk arah ---------- */
+.home-top { display: grid; gap: 1.5rem; padding-top: 1.5rem; }
+.board {
+  background: var(--sign); color: #fff;
+  border: 3px solid #fff; outline: 2px solid var(--sign);
+  border-radius: 14px; padding: 1.5rem 1.25rem 1.25rem;
+}
+.board h1 { color: #fff; }
+.board .lede { color: #dff0e8; margin-top: 0.75rem; }
+.board form { margin-top: 1.5rem; display: grid; gap: 0.9rem; }
+.field label { display: block; font-family: var(--display); font-weight: 600; font-size: 1.2rem; margin-bottom: 0.3rem; }
+.field-input { position: relative; }
+.field-input input[type="text"] {
+  width: 100%; background: #fff; color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 6px; padding: 0.8rem 0.9rem; font-size: 1.05rem;
+}
+.field-input input::placeholder { color: #8a949c; }
+.field-tools { display: flex; align-items: center; gap: 0.6rem; }
+.board .tool { background: transparent; color: #fff; border: 1.5px solid rgba(255, 255, 255, 0.65); border-radius: 6px; padding: 0.45rem 0.7rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.4rem; }
+.board .tool:hover { background: rgba(255, 255, 255, 0.14); }
+.board .tool:disabled { opacity: 0.6; cursor: progress; }
+.form-error { background: #fff; color: var(--stop); border-left: 5px solid var(--stop); border-radius: 4px; padding: 0.7rem 0.85rem; font-weight: 500; }
+
+.suggestions { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 6px; max-height: 17rem; overflow-y: auto; z-index: 50; }
+.sugg-item { display: flex; align-items: center; gap: 0.7rem; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 0.6rem 0.8rem; }
+.sugg-item:last-child { border-bottom: 0; }
+.sugg-item:hover, .sugg-item:focus { background: #fff6cc; }
+.sugg-item strong { display: block; font-weight: 600; }
+.sugg-item small { display: block; color: var(--muted); font-size: 0.85rem; }
+.sugg-item > span { min-width: 0; }
+.sugg-item strong, .sugg-item small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.home-photo { margin: 0; display: none; }
+.home-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+.home-photo figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }
+
+.popular { display: grid; gap: 0; margin-top: 1rem; border-top: 1px solid var(--line); }
+.popular-btn { display: flex; align-items: baseline; gap: 0.6rem; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 0.8rem 0.25rem; font-size: 1.05rem; }
+.popular-btn:hover { background: var(--paper); }
+.popular-btn b { font-weight: 600; }
+.popular-btn span { color: var(--muted); }
+
+/* ---------- Hasil pencarian ---------- */
+.result-head { padding-block: 1.5rem 1rem; }
+.result-head h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin-top: 0.75rem; }
+.result-head .note { margin-top: 0.35rem; }
+.results { display: grid; gap: 0.9rem; max-width: 46rem; padding-bottom: 3rem; }
+
+.trip { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; }
+.trip[open] { border-color: var(--ink); }
+.trip > summary { list-style: none; cursor: pointer; padding: 1rem 1.1rem; display: grid; grid-template-columns: 1fr auto; gap: 0.5rem 1rem; align-items: center; }
+.trip > summary::-webkit-details-marker { display: none; }
+.trip-plates { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.trip-plates svg { color: var(--muted); }
+.trip-time { font-family: var(--display); font-weight: 700; font-size: 1.9rem; line-height: 1; text-align: right; white-space: nowrap; }
+.trip-meta { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); font-size: 0.95rem; }
+.trip-meta .best { color: var(--sign); font-weight: 600; }
+.trip-toggle { color: var(--sign); font-weight: 600; white-space: nowrap; }
+.trip-toggle::after { content: "Lihat langkahnya"; }
+.trip[open] .trip-toggle::after { content: "Tutup"; }
+.trip-body { border-top: 1px solid var(--line); padding: 1.1rem; }
+.trip-map { height: 14rem; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+
+.steps { margin-top: 1.25rem; }
+.step { position: relative; padding: 0 0 1.4rem 2.6rem; }
+.step::before { content: ""; position: absolute; left: 0.8rem; top: 1.7rem; bottom: 0; width: 2px; background: var(--line); }
+.step:last-child { padding-bottom: 0.25rem; }
+.step:last-child::before { display: none; }
+.step-walk::before { background: repeating-linear-gradient(to bottom, var(--muted) 0 3px, transparent 3px 8px); }
+.step-mark { position: absolute; left: 0; top: 0; width: 1.7rem; height: 1.7rem; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); display: grid; place-items: center; font-size: 0.85rem; }
+.step-end .step-mark { background: var(--stop); border-color: var(--stop); color: #fff; }
+.step-label { color: var(--muted); font-size: 0.9rem; font-weight: 500; }
+.step-ride { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin: 0.3rem 0; font-size: 1.05rem; }
+.step small { display: block; color: var(--muted); font-size: 0.9rem; margin-top: 0.15rem; }
+.step details { margin-top: 0.4rem; }
+.step details summary { color: var(--sign); font-weight: 600; font-size: 0.92rem; cursor: pointer; }
+.step details ol { margin-top: 0.35rem; padding-left: 1.2rem; list-style: decimal; color: var(--muted); font-size: 0.92rem; }
+.trip-actions { margin-top: 1rem; }
+
+.empty { background: var(--paper); border: 1px solid var(--line); border-left: 5px solid var(--stop); border-radius: 6px; padding: 1.4rem 1.25rem; max-width: 40rem; }
+.empty p { margin: 0.5rem 0 1.1rem; max-width: 34rem; }
+
+/* ---------- Pantau posisi ---------- */
+.track { padding-block: 1.25rem 2.5rem; }
+.track-head h1 { font-size: 2rem; }
+.track-map { height: min(60vh, 32rem); margin-top: 1rem; border: 1px solid var(--ink); border-radius: 8px; overflow: hidden; }
+.track-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem; margin-top: 1rem; }
+.track-status { margin-right: auto; }
+.track-status strong { display: block; font-variant-numeric: tabular-nums; }
+.track-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ---------- Layar tunggu ---------- */
+.loading { position: fixed; inset: 0; z-index: 900; background: rgba(237, 239, 241, 0.94); display: grid; place-items: center; padding: 1.5rem; }
+.loading-box { background: var(--sign); color: #fff; border: 3px solid #fff; outline: 2px solid var(--sign); border-radius: 12px; padding: 1.4rem 1.5rem; max-width: 26rem; width: 100%; }
+.loading-box p { font-family: var(--display); font-size: 1.5rem; font-weight: 600; line-height: 1.2; }
+.loading-bar { margin-top: 1rem; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.25); overflow: hidden; }
+.loading-bar::after { content: ""; display: block; width: 35%; height: 100%; background: var(--angkot); animation: jalan 1.1s linear infinite; }
+@keyframes jalan { from { transform: translateX(-100%); } to { transform: translateX(290%); } }
+
+/* ---------- Semua trayek ---------- */
+.page-head { padding-block: 2rem 1.25rem; }
+.page-head .lede { margin-top: 0.6rem; }
+.filters { display: grid; gap: 0.75rem; margin-top: 1.25rem; max-width: 46rem; }
+.filters input { width: 100%; background: var(--paper); border: 2px solid var(--ink); border-radius: 6px; padding: 0.75rem 0.9rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chip { background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 0.35rem 0.8rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.45rem; }
+.chip i { width: 0.8rem; height: 0.8rem; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-block; }
+.chip[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.route-list { margin-top: 1rem; border-top: 1px solid var(--line); }
+.route-row { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.9rem; align-items: center; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 0.8rem 0.25rem; }
+.route-row:hover { background: var(--paper); }
+.route-row .plat { grid-row: span 2; align-self: start; }
+.route-row b { grid-column: 2; font-weight: 600; font-size: 1.05rem; }
+.route-row small { grid-column: 2; color: var(--muted); font-size: 0.9rem; }
+.pager { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin: 1.5rem 0 3rem; }
+.page-btn { min-width: 2.4rem; height: 2.4rem; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 0 0.7rem; font-weight: 600; }
+.page-btn[aria-current="page"] { background: var(--angkot); border-color: var(--ink); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.modal { position: fixed; inset: 0; z-index: 800; display: grid; place-items: end center; }
+.modal-backdrop { position: absolute; inset: 0; background: rgba(20, 32, 43, 0.55); }
+.modal-sheet { position: relative; background: var(--paper); width: 100%; max-width: 34rem; max-height: 92vh; overflow-y: auto; border-radius: 12px 12px 0 0; padding: 1.25rem; }
+.modal-top { display: flex; align-items: start; gap: 1rem; }
+.modal-top h2 { flex: 1; }
+.modal-close { background: none; border: 1px solid var(--line); border-radius: 4px; width: 2.4rem; height: 2.4rem; display: grid; place-items: center; }
+.modal-facts { color: var(--muted); margin-top: 0.4rem; }
+.modal-map { height: 13rem; margin: 1rem 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.stop-list { margin: 0.6rem 0 1.25rem; padding-left: 1.4rem; list-style: decimal; }
+.stop-list li { padding: 0.2rem 0; }
+.stop-list li:first-child, .stop-list li:last-child { font-weight: 600; }
+
+/* ---------- Tentang ---------- */
+.prose { max-width: 40rem; padding-bottom: 3rem; }
+.prose h2 { margin-top: 2.25rem; }
+.prose p { margin-top: 0.7rem; }
+.howto { margin-top: 0.9rem; padding-left: 1.4rem; list-style: decimal; }
+.howto li { padding: 0.35rem 0; }
+.howto b { font-weight: 600; }
+.livery { margin-top: 0.9rem; border-top: 1px solid var(--line); }
+.livery li { display: flex; align-items: center; gap: 0.9rem; padding: 0.7rem 0; border-bottom: 1px solid var(--line); }
+.livery small { display: block; color: var(--muted); font-size: 0.9rem; }
+
+/* ---------- Kaki halaman ---------- */
+.site-footer { background: var(--ink); color: #c9d1d8; padding-block: 1.75rem; font-size: 0.95rem; }
+.site-footer .wrap { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; justify-content: space-between; }
+.site-footer a { color: #fff; }
+
+/* Peta Leaflet mengikuti huruf halaman */
+.leaflet-container { font-family: var(--text); }
+
+@media (min-width: 52rem) {
+  .home-top { grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); align-items: stretch; padding-top: 2.25rem; }
+  .board { padding: 2.25rem 2.25rem 2rem; }
+  .home-photo { display: flex; flex-direction: column; }
+  .home-photo img { flex: 1; min-height: 0; }
+  .popular { grid-template-columns: 1fr 1fr; column-gap: 2.5rem; }
+  .modal { place-items: center; }
+  .modal-sheet { border-radius: 12px; }
+  .route-row { grid-template-columns: auto 1fr auto; }
+  .route-row small.count { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
 }
 
-/* --- Marquee --- */
-.slush-marquee { overflow: hidden; }
-.marquee-track {
-  animation: marquee-scroll 25s linear infinite;
-}
-@keyframes marquee-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* --- Sticker Float Animation --- */
-.sticker-float {
-  animation: sticker-bob 3s ease-in-out infinite;
-}
-@keyframes sticker-bob {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  33% { transform: translateY(-3px) rotate(2deg); }
-  66% { transform: translateY(2px) rotate(-1deg); }
+@media (max-width: 30rem) {
+  /* Logo sudah menuju beranda, jadi tautan Beranda disembunyikan supaya bilah atas muat. */
+  .site-header .wrap { gap: 0.5rem; }
+  .site-nav a[href="/"] { display: none; }
+  .site-nav a { padding: 0.5rem 0.45rem; }
+  .brand { font-size: 1.25rem; }
+  .trip-time { font-size: 1.6rem; }
+  .trip-plates .plat-lg { min-width: 3rem; height: 2.3rem; font-size: 1.4rem; }
+  .trip-plates { gap: 0.2rem; }
 }
 
-/* --- Loading --- */
-.loading-dots { display: flex; gap: 0.5rem; }
-.loading-dot {
-  animation: dot-pulse 1.4s ease-in-out infinite;
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar::after { animation: none; width: 100%; }
+  html { scroll-behavior: auto; }
 }
-.loading-dot:nth-child(2) { animation-delay: 0.2s; }
-.loading-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dot-pulse {
-  0%, 80%, 100% { transform: scale(1); opacity: 1; }
-  40% { transform: scale(1.4); opacity: 0.6; }
-}
-
-.angkot-bounce {
-  animation: angkot-bounce 1.5s ease-in-out infinite;
-}
-@keyframes angkot-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-.signal-pulse circle:not(:last-child) {
-  animation: signal-ring 2s ease-out infinite;
-}
-.signal-pulse circle:last-child {
-  animation: signal-core 2s ease-in-out infinite;
-}
-@keyframes signal-ring {
-  0% { opacity: 0.6; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.8); }
-}
-@keyframes signal-core {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.3); }
-}
-
-.road-dash {
-  animation: road-scroll 1.2s linear infinite;
-}
-@keyframes road-scroll {
-  0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: -40; }
-}
-
-/* --- Nav active state --- */
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 20px;
-  height: 3px;
-  background: #4da2ff;
-  border-radius: 9999px;
-  border: 1px solid #000000;
-}
-
-/* --- Suggestion items --- */
-.suggestion-item {
-  padding: 0.625rem 1rem;
-  cursor: pointer;
-  transition: all 0.15s;
-  border-bottom: 1px solid #00000010;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8125rem;
-  color: #000000;
-}
-.suggestion-item:last-child { border-bottom: none; }
-.suggestion-item:hover,
-.suggestion-item.highlighted {
-  background: #4da2ff12;
-}
-
-/* --- Route Cards --- */
-.route-card,
-.popular-route,
-.explorer-card {
-  background: #ffffff;
-  border: 2px solid #000000;
-  border-radius: 1rem;
-  padding: 1rem;
-  transition: all 0.15s;
-  position: relative;
-  overflow: hidden;
-}
-.route-card::before,
-.popular-route::before,
-.explorer-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  border-radius: 1rem 1rem 0 0;
-}
-.route-card:hover,
-.popular-route:hover,
-.explorer-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0px 0px #000000;
-}
-
-/* Livery stripe colors on cards */
-.livery-kuning::before { background: #ffd731; }
-.livery-biru::before   { background: #4da2ff; }
-.livery-hijau::before  { background: #55db9c; }
-.livery-merah::before  { background: #fb4903; }
-.livery-putih::before  { background: #cccccc; }
-.livery-ungu::before   { background: #5c4ade; }
-.livery-hitam::before  { background: #000000; }
-
-/* --- Result Cards --- */
-.result-card {
-  background: #ffffff;
-  border: 2px solid #000000;
-  border-radius: 1rem;
-  overflow: hidden;
-  transition: all 0.15s;
-}
-.result-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0px 0px #000000;
-}
-.result-card .route-header {
-  padding: 1rem 1.25rem;
-  border-bottom: 2px solid #00000010;
-}
-.result-card .route-body {
-  padding: 1rem 1.25rem;
-}
-.result-card .route-stops {
-  padding: 1rem 1.25rem;
-  border-top: 2px solid #00000010;
-}
-
-/* Livery stripe on result cards */
-.result-card .livery-stripe {
-  height: 6px;
-  width: 100%;
-}
-.stripe-kuning { background: #ffd731; }
-.stripe-biru   { background: #4da2ff; }
-.stripe-hijau  { background: #55db9c; }
-.stripe-merah  { background: #fb4903; }
-.stripe-putih  { background: #cccccc; }
-.stripe-ungu   { background: #5c4ade; }
-.stripe-hitam  { background: #000000; }
-
-/* --- Route maps (Leaflet) --- */
-.route-map,
-.route-map-multi,
-#modal-map,
-#tracking-map {
-  width: 100%;
-  background: #dceeff;
-  overflow: hidden;
-  position: relative;
-  z-index: 0;
-}
-.route-map,
-.route-map-multi {
-  height: 10.5rem;
-  min-height: 10.5rem;
-  border: 2px solid #000000;
-  border-radius: 0.75rem;
-}
-.route-map.leaflet-container,
-.route-map-multi.leaflet-container {
-  height: 10.5rem;
-}
-#modal-map {
-  min-height: 12rem;
-}
-#modal-map.leaflet-container {
-  height: 100%;
-  min-height: 12rem;
-}
-#tracking-map,
-#tracking-map.leaflet-container {
-  height: 100%;
-  min-height: 100%;
-}
-
-/* --- Leaflet overrides --- */
-.leaflet-container {
-  font-family: 'Inter', sans-serif;
-  background: #dceeff;
-}
-.leaflet-control-zoom a {
-  border: 2px solid #000000 !important;
-  border-radius: 0.5rem !important;
-  font-weight: 700;
-  color: #000000;
-}
-.leaflet-popup-content-wrapper {
-  border: 2px solid #000000;
-  border-radius: 0.75rem;
-  box-shadow: 3px 3px 0px 0px #000000;
-}
-.leaflet-popup-tip {
-  border-top-color: #000000;
-}
-
-.brutalist-tooltip {
-  background: #000000;
-  color: #ffffff;
-  border: 2px solid #000000;
-  border-radius: 0.5rem;
-  font-family: 'Bowlby One SC', sans-serif;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  padding: 4px 8px;
-  box-shadow: 2px 2px 0px 0px #4da2ff;
-}
-.brutalist-tooltip::before {
-  border-top-color: #000000;
-}
-
-.user-pin {
-  width: 18px;
-  height: 18px;
-  background: #22c55e;
-  border: 3px solid #000;
-  border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.28);
-}
-.transfer-pin {
-  width: 22px;
-  height: 22px;
-  background: #ffd731;
-  color: #000;
-  border: 2px solid #000;
-  border-radius: 6px;
-  font-family: 'Bowlby One SC', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#explorer-pagination {
-  flex-wrap: wrap;
-}
-
-/* --- Pagination --- */
-.page-btn {
-  width: 2rem;
-  height: 2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #000000;
-  border-radius: 0.5rem;
-  font-family: 'Bowlby One SC', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #000000;
-  background: #ffffff;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.page-btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 2px 2px 0px 0px #000000;
-}
-.page-btn.active {
-  background: #ffd731;
-  color: #000000;
-}
-
-/* --- Toast --- */
-.toast-notification {
-  transform: translateX(-50%) translateY(20px);
-  opacity: 0;
-}
-@keyframes toastIn {
-  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
-  to { transform: translateX(-50%) translateY(0); opacity: 1; }
-}
-@keyframes toastOut {
-  from { transform: translateX(-50%) translateY(0); opacity: 1; }
-  to { transform: translateX(-50%) translateY(20px); opacity: 0; }
-}
-
-/* --- Tracking pulse --- */
-.tracking-pulse {
-  animation: track-pulse 2s ease-out infinite;
-}
-@keyframes track-pulse {
-  0% { opacity: 0.2; transform: scale(1); }
-  100% { opacity: 0; transform: scale(2); }
-}
-
-/* --- Sticker decorations (decorative dots scattered on sections) --- */
-.sticker-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  border: 1.5px solid #000000;
-  position: absolute;
-  pointer-events: none;
-  animation: sticker-bob 4s ease-in-out infinite;
-}
-
-/* --- Scrollbar --- */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #dceeff; }
-::-webkit-scrollbar-thumb {
-  background: #4da2ff;
-  border: 2px solid #000000;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover { background: #3b8ae6; }
-
-/* --- Selection --- */
-::selection {
-  background: #ffd731;
-  color: #000000;
-}
-
-/* --- Focus ring --- */
-input:focus, button:focus-visible {
-  outline: 3px solid #4da2ff;
-  outline-offset: 2px;
-}
-
-/* --- Gojek-style Map Markers --- */
-.gojek-marker {
-  background: none;
-  border: none;
-}
-.gojek-pin {
-  filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.3));
-}
-.gojek-pin svg {
-  display: block;
-}
-.gojek-dot {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid #000000;
-  box-shadow: 1px 1px 0px 0px rgba(0,0,0,0.2);
-}
-.gojek-transfer-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #ffd731;
-  border: 2px solid #000000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 1px 1px 0px 0px rgba(0,0,0,0.2);
-}
-.gojek-transfer-dot svg {
-  width: 12px;
-  height: 12px;
-}
-.gojek-route-badge {
-  background: #ffffff;
-  border: 2px solid #000000;
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-family: 'Bowlby One SC', sans-serif;
-  font-size: 11px;
-  font-weight: 900;
-  color: #000000;
-  white-space: nowrap;
-  box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.15);
-  text-align: center;
-  line-height: 1.4;
-}
-
-/* --- Search icon hide on focus --- */
-.input-group .search-icon { transition: opacity 0.2s, transform 0.2s; }
-.input-group.focused .search-icon { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-
-/* --- Route card map fixes --- */
-.route-map, .route-map-multi { position: relative; }
-.route-map .leaflet-control, .route-map-multi .leaflet-control { z-index: 400 !important; }
-.leaflet-container { max-width: 100%; }
-#modal-map, .route-map, .route-map-multi, #tracking-map { max-width: 100%; overflow: hidden; }
-
-/* Ensure suggestion dropdowns are not clipped */
-#origin-suggestions, #dest-suggestions {
-  z-index: 60 !important;
-}
-#search-form { overflow: visible; }
-
-/* --- Map tap-to-activate --- */
-.map-inactive {
-  cursor: pointer;
-  position: relative;
-}
-.map-hint-label {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.7);
-  color: white;
-  font-size: 10px;
-  font-family: 'Space Grotesk', sans-serif;
-  padding: 4px 12px;
-  border-radius: 999px;
-  z-index: 500;
-  pointer-events: none;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  animation: map-hint-pulse 2s ease-in-out infinite;
-}
-.map-hint-label.hidden { display: none; }
-.map-shrink-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0,0,0,0.75);
-  color: white;
-  font-size: 10px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 8px;
-  border: 2px solid rgba(255,255,255,0.3);
-  z-index: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: background 0.2s;
-}
-.map-shrink-btn:hover {
-  background: rgba(0,0,0,0.9);
-}
-.map-shrink-btn.hidden { display: none; }
-.map-active {
-  cursor: grab;
-}
-@keyframes map-hint-pulse {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 1; }
-}
-
-/* --- Tracking Person Marker --- */
-.tracking-person-marker {
-  background: transparent !important;
-  border: none !important;
-}
-.tpm-wrap {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.tpm-pulse {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(77, 162, 255, 0.2);
-  animation: tpm-pulse-ring 2s ease-out infinite;
-}
-.tpm-dot {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #4da2ff;
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 2px #4da2ff, 0 2px 8px rgba(77,162,255,0.4);
-  animation: tpm-bounce 1.5s ease-in-out infinite;
-}
-.tpm-person {
-  position: absolute;
-  font-size: 18px;
-  line-height: 1;
-  animation: tpm-float 2s ease-in-out infinite;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  z-index: 2;
-}
-@keyframes tpm-pulse-ring {
-  0% { transform: scale(0.5); opacity: 1; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
-@keyframes tpm-bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-@keyframes tpm-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-3px); }
-}
-
-/* --- Mobile improvements --- */
-@media (max-width: 640px) {
-  .route-card, .popular-route, .explorer-card {
-    padding: 0.75rem;
-  }
-  .route-map, .route-map-multi {
-    height: 180px !important;
-    min-height: 180px !important;
-  }
-  .route-map.leaflet-container,
-  .route-map-multi.leaflet-container {
-    height: 180px !important;
-  }
-  .gojek-pin, .gojek-marker {
-    transform: scale(0.85);
-  }
-  .gojek-route-badge {
-    font-size: 9px;
-    padding: 1px 5px;
-  }
-  .result-card .route-header { padding: 0.75rem 1rem; }
-  .result-card .route-body { padding: 0.75rem 1rem; }
-  .result-card .route-stops { padding: 0.75rem 1rem; }
-  footer .grid { gap: 1.5rem; }
-  footer [class*="grid-cols-1"] > div { min-width: 0; }
-}
-
-/* Extra small screens */
-@media (max-width: 380px) {
-  .font-display { letter-spacing: -0.01em; }
-  .slush-marquee .marquee-track { animation-duration: 20s; }
-  .route-card .route-body .ml-8 { margin-left: 1.5rem; }
-  .gojek-route-badge { font-size: 8px; padding: 1px 4px; }
-  .nav-link { padding: 0.25rem 0.375rem; }
-  .route-map, .route-map-multi {
-    height: 9rem !important;
-    min-height: 9rem !important;
-  }
-  h1 { text-wrap: balance; }
-  footer .max-w-5xl { padding-left: 1rem; padding-right: 1rem; }
-}
-
-/* Medium screens - tablets */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .route-map, .route-map-multi {
-    height: 200px !important;
-    min-height: 200px !important;
-  }
-}
-
-/* Touch-friendly tap targets */
-@media (pointer: coarse) {
-  button, a, .suggestion-item {
-    min-height: 44px;
-  }
-  .nav-link {
-    padding: 0.5rem 0.625rem;
-  }
-}
-
-/* iOS safe area */
-@supports (padding: env(safe-area-inset-bottom)) {
-  footer {
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-  }
-  [data-view="tracking"] .absolute.bottom-0 {
-    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
-  }
-  #route-detail-modal {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-}
-/* Kartu pilihan rute: ringkasannya bisa diketuk untuk membuka langkah dan peta. */
-details.itinerary > summary::-webkit-details-marker { display: none; }
-details.itinerary > summary:focus-visible { outline: 3px solid #4da2ff; outline-offset: -3px; }
-details.itinerary .itinerary-toggle::after { content: "Lihat langkahnya"; }
-details.itinerary[open] .itinerary-toggle::after { content: "Tutup"; }

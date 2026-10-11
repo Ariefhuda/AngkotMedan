@@ -1,11 +1,12 @@
 // Warna badan angkot per kelompok operator, dipakai untuk pelat nomor dan garis di peta.
+// hex: warna utama, hex2: warna kedua untuk angkot dua warna, ink: warna tulisan di atasnya.
 const LIVERY_COLORS = {
-  "Kuning":      { bg: "bg-[#ffd731]", text: "text-[#000000]", border: "border-[#ffd731]", hex: "#ffd731", label: "Kuning", lightBg: "bg-[#ffd731]/10" },
-  "Biru":        { bg: "bg-[#4da2ff]", text: "text-white",     border: "border-[#4da2ff]", hex: "#4da2ff", label: "Biru",   lightBg: "bg-[#4da2ff]/10" },
-  "Hijau":       { bg: "bg-[#55db9c]", text: "text-white",     border: "border-[#55db9c]", hex: "#55db9c", label: "Hijau",  lightBg: "bg-[#55db9c]/10" },
-  "Merah Hijau": { bg: "bg-[#fb4903]", text: "text-white",     border: "border-[#fb4903]", hex: "#fb4903", label: "Merah Hijau", lightBg: "bg-[#fb4903]/10" },
-  "Merah Kuning":{ bg: "bg-[#fb4903]", text: "text-[#ffd731]", border: "border-[#fb4903]", hex: "#fb4903", label: "Merah Kuning", lightBg: "bg-[#fb4903]/10" },
-  "Putih":       { bg: "bg-white",     text: "text-[#000000]", border: "border-[#cccccc]",  hex: "#FFFFFF", label: "Putih",  lightBg: "bg-[#dceeff]" },
-  "Putih Hijau": { bg: "bg-white",     text: "text-[#55db9c]", border: "border-[#55db9c]", hex: "#FFFFFF", label: "Putih Hijau", lightBg: "bg-[#55db9c]/5" },
-  "-":           { bg: "bg-[#cccccc]",  text: "text-[#000000]", border: "border-[#cccccc]",  hex: "#D1D5DB", label: "-",     lightBg: "bg-[#dceeff]" }
+  "Kuning":       { hex: "#F7C600", ink: "#14202B", label: "Kuning" },
+  "Biru":         { hex: "#1F6FD0", ink: "#FFFFFF", label: "Biru" },
+  "Hijau":        { hex: "#1E9E5A", ink: "#FFFFFF", label: "Hijau" },
+  "Merah Hijau":  { hex: "#C8372D", hex2: "#1E9E5A", ink: "#FFFFFF", label: "Merah hijau" },
+  "Merah Kuning": { hex: "#C8372D", hex2: "#F7C600", ink: "#FFFFFF", label: "Merah kuning" },
+  "Putih":        { hex: "#FFFFFF", ink: "#14202B", label: "Putih" },
+  "Putih Hijau":  { hex: "#FFFFFF", hex2: "#1E9E5A", ink: "#14202B", label: "Putih hijau" },
+  "-":            { hex: "#B9C1C8", ink: "#14202B", label: "belum tercatat" }
 };

@@ -1,222 +1,106 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#4da2ff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Semua Trayek — AngkotMedan</title>
-  <meta name="description" content="Jelajahi semua 118 trayek angkot di Medan. Cari berdasarkan warna livery atau operator.">
-  <meta property="og:title" content="Semua Trayek — AngkotMedan">
-  <meta property="og:description" content="Jelajahi semua 118 trayek angkot di Medan. Cari berdasarkan warna livery atau operator.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="img/hero-angkot.jpg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Semua trayek angkot Medan | AngkotMedan</title>
+  <meta name="description" content="Daftar 118 trayek angkot di Kota Medan beserta operator, warna, dan haltenya.">
+  <meta property="og:title" content="Semua trayek angkot Medan | AngkotMedan">
+  <meta property="og:description" content="Daftar 118 trayek angkot di Kota Medan beserta operator, warna, dan haltenya.">
+  <meta property="og:image" content="/img/hero-angkot.jpg">
+  <meta name="theme-color" content="#0c6b45">
   <link rel="icon" type="image/png" href="/logo.png">
   <link rel="apple-touch-icon" href="/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            mustard: '#ffd731',
-            navy: '#4da2ff',
-            'mint-pop': '#55db9c',
-            ember: '#fb4903',
-          },
-          fontFamily: {
-            display: ['"Bowlby One SC"', 'system-ui', 'sans-serif'],
-            body: ['"Inter"', 'system-ui', 'sans-serif'],
-          },
-          boxShadow: {
-            'brutal': '3px 3px 0px 0px #000000',
-            'brutal-sm': '2px 2px 0px 0px #000000',
-            'brutal-lg': '5px 5px 0px 0px #000000',
-          }
-        }
-      }
-    }
-  </script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
-  
-  <style>
-    /* Fix letak kontrol Leaflet Map di dalam Modal */
-    .leaflet-top { top: 10px !important; }
-    .leaflet-bottom { bottom: 10px !important; }
-  </style>
 </head>
-<body class="bg-[#dceeff] min-h-[100dvh] flex flex-col font-body text-[#000000] antialiased slush-canvas">
-
-  <!-- NAVBAR -->
-  <nav id="site-navbar" class="sticky top-0 z-50 bg-[#ffffff]/95 backdrop-blur-sm transition-shadow duration-200">
-    <div class="max-w-5xl mx-auto px-3 sm:px-4 h-14 sm:h-16 md:h-20 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-1.5 group shrink-0">
-        <div class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl flex items-center justify-center overflow-hidden">
-          <img src="/logo.png" alt="Angkot Medan" class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain" />
-        </div>
-        <div class="hidden sm:block">
-          <p class="font-display font-bold text-sm leading-none tracking-tight text-[#000000]">Angkot<span class="text-[#ffd731]">Medan</span></p>
-          <p class="font-body text-[10px] text-[#000]/40 leading-none mt-0.5 tracking-wide">FINDER</p>
-        </div>
-      </a>
-      <div class="flex items-center gap-0.5 sm:gap-1">
-        <span class="hidden sm:inline-flex items-center px-3 py-1 bg-[#4da2ff]/15 text-[#4da2ff] font-display font-bold text-[11px] border-2 border-[#4da2ff]/30 mr-2 rounded-full">118</span>
-        <a href="/" class="nav-link px-2 sm:px-3 py-1.5 font-display text-[11px] sm:text-sm font-medium text-[#000]/50 hover:text-[#000000] transition-colors relative" data-i18n="nav_home">Beranda</a>
-        <a href="/tentang" class="nav-link px-2 sm:px-3 py-1.5 font-display text-[11px] sm:text-sm font-medium text-[#000]/50 hover:text-[#000000] transition-colors relative" data-i18n="nav_about">Tentang</a>
-        <div class="relative ml-0.5 sm:ml-1">
-          <button id="lang-toggle" class="flex items-center gap-1 px-1.5 sm:px-2 py-1.5 rounded-lg border-2 border-[#000]/10 hover:border-[#000000] hover:bg-[#ffd731]/10 transition-all font-display text-[11px] sm:text-xs font-bold text-[#000]/50">
-            <i data-lucide="globe" class="w-3.5 h-3.5"></i>
-            <span id="lang-label" class="hidden sm:inline">ID</span>
-          </button>
-          <div id="lang-dropdown" class="hidden absolute right-0 top-full mt-1 bg-white border-2 border-[#000000] shadow-brutal rounded-lg overflow-hidden z-60 min-w-[120px] max-h-[300px] overflow-y-auto">
-            <button data-lang="id" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#ffd731]/10 flex items-center gap-2"><span>🇮🇩</span> Indonesia</button>
-            <button data-lang="en" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#4da2ff]/10 flex items-center gap-2"><span>🇺🇸</span> English</button>
-            <button data-lang="jv" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#55db9c]/10 flex items-center gap-2"><span>🎭</span> Jawa</button>
-            <button data-lang="ms" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#fb4903]/10 flex items-center gap-2"><span>🇲🇾</span> Melayu</button>
-            <button data-lang="btk" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#e9ccff]/10 flex items-center gap-2"><span>🏠</span> Batak</button>
-            <button data-lang="min" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#ffd731]/10 flex items-center gap-2"><span>🌾</span> Minang</button>
-            <button data-lang="su" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#4da2ff]/10 flex items-center gap-2"><span>🏔️</span> Sunda</button>
-            <button data-lang="ace" class="lang-option w-full text-left px-3 py-2 font-display text-xs font-bold hover:bg-[#e9ccff]/10 flex items-center gap-2"><span>🕌</span> Aceh</button>
+<body>
+  <header class="site-header" id="site-navbar">
+    <div class="wrap">
+      <a class="brand" href="/"><img src="/logo.png" alt=""> AngkotMedan</a>
+      <nav class="site-nav" aria-label="Utama">
+        <a href="/" data-i18n="nav_home">Beranda</a>
+        <a href="/semua-trayek" aria-current="page">Trayek</a>
+        <a href="/tentang" data-i18n="nav_about">Tentang</a>
+        <div class="lang">
+          <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Ganti bahasa"><i data-lucide="globe"></i><span id="lang-label">ID</span></button>
+          <div class="lang-menu hidden" id="lang-dropdown">
+          <button type="button" class="lang-option" data-lang="id">Indonesia</button>
+          <button type="button" class="lang-option" data-lang="en">English</button>
+          <button type="button" class="lang-option" data-lang="jv">Jawa</button>
+          <button type="button" class="lang-option" data-lang="ms">Melayu</button>
+          <button type="button" class="lang-option" data-lang="btk">Batak</button>
+          <button type="button" class="lang-option" data-lang="min">Minang</button>
+          <button type="button" class="lang-option" data-lang="su">Sunda</button>
+          <button type="button" class="lang-option" data-lang="ace">Aceh</button>
           </div>
         </div>
-      </div>
+      </nav>
     </div>
-  </nav>
+  </header>
 
-  <!-- EXPLORER PAGE -->
-  <main class="pt-6 pb-20 flex-1">
-    <div class="max-w-5xl mx-auto px-4">
-      <section class="mb-8">
-        <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-[#000]/50 hover:text-[#000000] transition-colors mb-6 group">
-          <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i> <span data-i18n="btn_back">Beranda</span>
-        </a>
-        <h1 class="font-display text-3xl md:text-4xl font-bold text-[#000000] tracking-tight mb-4" data-i18n="explore_title">Semua Trayek Angkot</h1>
-        <p class="font-body text-base text-[#000]/55 max-w-2xl leading-relaxed" data-i18n="explorer_desc">Lihat semua 118 trayek angkot di Medan. Klik kartu untuk lihat rute detail.</p>
-      </section>
-
-      <!-- SEARCH + FILTER -->
-      <section class="mb-8" id="route-explorer">
-        <div class="bg-white border-2 border-[#000000] shadow-brutal p-4 rounded-2xl">
-          <div class="flex flex-col sm:flex-row gap-3">
-            <div class="relative flex-1">
-              <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#000]/30"></i>
-              <input type="text" id="explorer-search" class="w-full pl-10 pr-4 py-3 bg-[#dceeff] border-2 border-[#000]/8 rounded-xl font-body text-sm focus:outline-none focus:border-[#4da2ff] focus:shadow-brutal-sm transition-all" placeholder="Cari nomor trayek atau nama operator..." data-i18n-placeholder="explorer_search">
-            </div>
-          </div>
-            <div class="flex flex-wrap items-center justify-between mt-3 pt-3 border-t border-[#000]/8 gap-2">
-              <p class="font-body text-xs text-[#000]/40" id="explorer-count"></p>
-              <div class="flex flex-wrap gap-1.5">
-              <button class="explorer-filter-btn px-3 py-1 bg-[#ffd731] border-2 border-[#000]/10 font-display text-[10px] font-bold rounded-full hover:border-[#000000] transition-all" data-filter="">Semua</button>
-              <button class="explorer-filter-btn px-3 py-1 bg-[#ffd731]/30 border-2 border-[#000]/10 font-display text-[10px] font-bold rounded-full hover:border-[#000000] transition-all" data-filter="kuning">Kuning</button>
-              <button class="explorer-filter-btn px-3 py-1 bg-[#4da2ff]/30 border-2 border-[#000]/10 font-display text-[10px] font-bold rounded-full hover:border-[#000000] transition-all" data-filter="biru">Biru</button>
-              <button class="explorer-filter-btn px-3 py-1 bg-[#55db9c]/30 border-2 border-[#000]/10 font-display text-[10px] font-bold rounded-full hover:border-[#000000] transition-all" data-filter="hijau">Hijau</button>
-              <button class="explorer-filter-btn px-3 py-1 bg-[#fb4903]/30 border-2 border-[#000]/10 font-display text-[10px] font-bold rounded-full hover:border-[#000000] transition-all" data-filter="merah">Merah</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- EXPLORER GRID -->
-      <div id="explorer-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"></div>
-      <div id="explorer-pagination" class="flex justify-center items-center gap-2 mt-6"></div>
-
-      <!-- ROUTE DETAIL MODAL (DIPERBAIKI 100dvh + FLEX COL) -->
-      <div id="route-detail-modal" class="fixed inset-0 z-[2000] hidden">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modal-backdrop"></div>
-        <div class="absolute inset-0 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-full sm:w-[520px] h-[100dvh] sm:h-auto sm:max-h-[90vh] bg-[#ffffff] border-0 sm:border-2 border-[#000000] shadow-none sm:shadow-brutal-lg rounded-none sm:rounded-2xl flex flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
-          
-          <div class="shrink-0 bg-white border-b-2 border-[#000]/8 px-4 sm:px-6 py-4 flex items-center justify-between z-10">
-            <h3 class="font-display text-lg font-bold text-[#000000] truncate pr-4" id="modal-route-title">Rute</h3>
-            <button id="modal-close" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#000]/10 hover:border-[#fb4903] hover:bg-[#fb4903]/10 transition-all">
-              <i data-lucide="x" class="w-4 h-4 text-[#000000]"></i>
-            </button>
-          </div>
-          
-          <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-6 bg-[#f7f9fc] sm:bg-white">
-            <div class="grid grid-cols-3 gap-2 sm:gap-3" id="modal-stats"></div>
-            <div id="modal-map" class="h-48 md:h-64 min-h-[12rem] bg-[#dceeff] border-2 border-[#000000] rounded-xl overflow-hidden relative z-0"></div>
-            <div class="bg-white sm:bg-transparent p-4 sm:p-0 border-2 border-[#000000] sm:border-0 rounded-xl sm:rounded-none">
-              <h4 class="font-display text-sm font-bold mb-4" data-i18n="modal_stops">Daftar Halte & Waypoints</h4>
-              <div id="modal-stops" class="space-y-0 pl-1"></div>
-            </div>
-            <button id="modal-search-btn" class="w-full py-3.5 bg-[#4da2ff] text-white border-2 border-[#000000] shadow-brutal-sm font-display text-sm font-bold hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-brutal active:translate-x-[1px] active:translate-y-[1px] transition-all rounded-xl mb-4 sm:mb-0">
-              <i data-lucide="search" class="w-4 h-4 inline mr-2"></i>Cari Rute ini
-            </button>
+  <main>
+    <div class="wrap" id="route-explorer">
+      <div class="page-head">
+        <h1 data-i18n="explore_title">Semua Trayek Angkot</h1>
+        <p class="lede" data-i18n="explorer_desc">Lihat semua 118 trayek angkot di Medan. Klik kartu untuk lihat rute detail.</p>
+        <div class="filters">
+          <input type="search" id="explorer-search" aria-label="Cari trayek" data-i18n-placeholder="explorer_search" placeholder="Cari nomor trayek atau nama operator...">
+          <div class="chips" role="group" aria-label="Saring menurut warna angkot">
+          <button type="button" class="chip explorer-filter-btn" data-filter="" aria-pressed="true">Semua</button>
+          <button type="button" class="chip explorer-filter-btn" data-filter="Kuning" aria-pressed="false"><i style="background:#F7C600"></i>Kuning</button>
+          <button type="button" class="chip explorer-filter-btn" data-filter="Biru" aria-pressed="false"><i style="background:#1F6FD0"></i>Biru</button>
+          <button type="button" class="chip explorer-filter-btn" data-filter="Hijau" aria-pressed="false"><i style="background:#1E9E5A"></i>Hijau</button>
+          <button type="button" class="chip explorer-filter-btn" data-filter="Merah" aria-pressed="false"><i style="background:#C8372D"></i>Merah</button>
+          <button type="button" class="chip explorer-filter-btn" data-filter="Putih" aria-pressed="false"><i style="background:#FFFFFF"></i>Putih</button>
           </div>
         </div>
       </div>
+      <p class="note" id="explorer-count"></p>
+      <div class="route-list" id="explorer-grid"></div>
+      <div class="pager" id="explorer-pagination"></div>
     </div>
   </main>
 
-  <footer id="site-footer" class="mt-auto bg-[#000000] text-[#ffffff]">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-        <div class="sm:col-span-2 lg:col-span-1">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-              <img src="/logo.png" alt="AngkotMedan" class="w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20 object-contain" />
-            </div>
-            <div>
-              <p class="font-display text-sm font-bold">Angkot <span class="text-[#ffd731]">Medan</span></p>
-              <p class="font-body text-[10px] text-[#ffffff]/40">FINDER</p>
-            </div>
-          </div>
-          <p class="font-body text-xs text-[#ffffff]/40 leading-relaxed max-w-xs">Cari rute angkot di Medan dengan mudah. Gratis, cepat, dan akurat untuk semua warga Medan.</p>
-        </div>
-        <div>
-          <h4 class="font-display text-xs font-bold text-[#ffd731] uppercase tracking-wider mb-4">Data</h4>
-          <ul class="space-y-2.5">
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-1.5 h-1.5 rounded-full bg-[#ffd731]"></span> 118 Trayek</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-1.5 h-1.5 rounded-full bg-[#4da2ff]"></span> 190 Halte</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-1.5 h-1.5 rounded-full bg-[#55db9c]"></span> 15+ Operator</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-1.5 h-1.5 rounded-full bg-[#fb4903]"></span> 4 Warna Livery</li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-display text-xs font-bold text-[#4da2ff] uppercase tracking-wider mb-4">Livery</h4>
-          <ul class="space-y-2.5">
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-5 h-3 rounded-sm bg-[#ffd731] border border-[#ffffff]/20"></span> Kuning</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-5 h-3 rounded-sm bg-[#4da2ff] border border-[#ffffff]/20"></span> Biru</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-5 h-3 rounded-sm bg-[#55db9c] border border-[#ffffff]/20"></span> Hijau</li>
-            <li class="flex items-center gap-2 font-body text-sm text-[#ffffff]/50"><span class="w-5 h-3 rounded-sm bg-[#fb4903] border border-[#ffffff]/20"></span> Merah</li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="font-display text-xs font-bold text-[#55db9c] uppercase tracking-wider mb-4">Informasi</h4>
-          <ul class="space-y-2.5">
-            <li class="font-body text-sm text-[#ffffff]/50">Data dari komunitas</li>
-            <li class="font-body text-sm text-[#ffffff]/50">Bukan resmi Dishub</li>
-            <li class="font-body text-sm text-[#ffffff]/50">Open source</li>
-          </ul>
-        </div>
+  <div class="modal hidden" id="route-detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-route-title">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-sheet">
+      <div class="modal-top">
+        <h2 id="modal-route-title"></h2>
+        <button type="button" class="modal-close" id="modal-close" aria-label="Tutup"><i data-lucide="x"></i></button>
       </div>
-      <div class="border-t border-[#ffffff]/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="font-body text-[11px] text-[#ffffff]/30">&copy; 2026 Angkot Medan Finder. Dibuat untuk komunitas Medan.</p>
-        <div class="flex items-center gap-3"></div>
-      </div>
+      <p class="modal-facts" id="modal-stats"></p>
+      <div class="modal-map" id="modal-map"></div>
+      <h3 data-i18n="modal_stops">Daftar Halte</h3>
+      <ol class="stop-list" id="modal-stops"></ol>
+      <button type="button" class="btn btn-go" id="modal-search-btn">Cari rute di trayek ini</button>
+    </div>
+  </div>
+
+  <footer class="site-footer" id="site-footer">
+    <div class="wrap">
+      <span>AngkotMedan. Data dari sumber publik dan pengamatan lapangan, bukan layanan resmi Dishub Kota Medan.</span>
+      <a href="https://github.com/Ariefhuda/AngkotMedan">Kode sumber</a>
     </div>
   </footer>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
   <script src="/js/livery.js"></script>
   <script src="/js/app.js"></script>
   <script>
     document.addEventListener('angkot:data', () => {
       renderRouteExplorer();
-      const explorerSearch = document.getElementById('explorer-search');
-      if (explorerSearch) {
-        explorerSearch.addEventListener('input', handleExplorerSearch);
-      }
-      document.querySelectorAll('.explorer-filter-btn').forEach(btn => {
+      document.getElementById('explorer-search').addEventListener('input', handleExplorerSearch);
+      const chips = document.querySelectorAll('.explorer-filter-btn');
+      chips.forEach(btn => {
         btn.addEventListener('click', () => {
           explorerFilter = btn.dataset.filter || '';
           explorerPage = 1;
+          chips.forEach(c => c.setAttribute('aria-pressed', String(c === btn)));
           renderRouteExplorer();
         });
       });
