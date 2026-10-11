@@ -10,16 +10,12 @@ Proyek ini dibuat untuk orang yang baru datang ke Medan. Informasi trayek angkot
 
 1. Ketik asal dan tujuan. Yang bisa diketik bukan cuma nama halte, tetapi juga nama tempat seperti mal, kampus, rumah sakit, atau jalan. Tombol "Lokasi saya" mengisi asal dari GPS.
 2. Server mencari halte dalam jarak 1 km dari kedua tempat itu, lalu mencari rangkaian angkot tercepat di antaranya, paling banyak dua kali pindah.
-3. Hasil tampil sebagai beberapa pilihan, yang tercepat di atas. Tiap pilihan berisi:
-   - pelat nomor angkot dengan warna badannya, sesuai urutan naik;
-   - perkiraan lama perjalanan, jumlah pindah, dan jarak jalan kaki;
-   - langkah per langkah: jalan kaki, naik (dengan arah yang tertulis di angkotnya), turun, pindah;
-   - peta dengan garis berwarna angkot dan garis putus-putus untuk jalan kaki.
-4. "Pantau posisi saya di rute ini" menampilkan posisi GPS di atas rute, supaya tahu kapan harus turun.
+3. Hasil tampil sebagai beberapa pilihan, yang tercepat di atas. Di bagian atas tiap pilihan ada pelat nomor angkot dengan warna badannya, berurutan sesuai urutan naik, lalu perkiraan lama perjalanan dan jarak jalan kakinya. Di bawahnya ada langkah-langkahnya. Untuk tiap angkot disebutkan arahnya, yaitu nama ujung trayek yang biasa tertulis di kaca depan. Peta menggambar tiap angkot dengan warnanya sendiri dan jalan kaki dengan garis putus-putus.
+4. Tombol "Pantau posisi saya di rute ini" menampilkan posisi GPS di atas rute, supaya tahu kapan harus turun.
 
 Kalau tidak ada rute, situs menjelaskan sebabnya: tempat tidak dikenali, tidak ada halte dalam 1 km (beserta halte terdekat), atau asal dan tujuan cukup dekat untuk jalan kaki.
 
-Halaman lain: **Semua Trayek** (daftar 118 trayek, bisa dicari dan disaring menurut warna) dan **Tentang**. Antarmuka tersedia dalam 8 bahasa; teks hasil pencarian baru ada dalam bahasa Indonesia.
+Ada dua halaman lain. Semua Trayek memuat daftar 118 trayek yang bisa dicari dan disaring menurut warna. Tentang menjelaskan proyeknya. Antarmuka tersedia dalam 8 bahasa; teks hasil pencarian baru ada dalam bahasa Indonesia.
 
 ## Susunan
 
@@ -64,13 +60,13 @@ Tidak ada variabel lingkungan yang wajib diisi.
 
 ## Hosting
 
-**Vercel.** Repo ini bisa langsung di-deploy: halaman dilayani dari `public/`, dan semua alamat `/api/*` diteruskan ke `api/index.js`.
+Situs yang sekarang hidup berjalan di Vercel. Repo ini bisa di-deploy ke sana apa adanya: Vercel melayani halaman dari `public/` dan meneruskan semua alamat `/api/*` ke `api/index.js`.
 
 ```bash
 npx vercel deploy --prod
 ```
 
-**Docker.** Untuk Render, Railway, Fly.io, Cloud Run, atau VPS sendiri:
+Untuk hosting berbasis container seperti Render, Railway, Fly.io, Cloud Run, atau VPS sendiri, pakai Docker:
 
 ```bash
 docker build -t angkotmedan .
@@ -161,14 +157,14 @@ Data dikumpulkan dari sumber publik dan pengamatan di lapangan.
 
 ## Keterbatasan
 
-Yang paling menentukan mutu hasil adalah datanya, dan data itu masih kasar:
+Hasil pencarian hanya sebaik datanya, dan data itu masih kasar:
 
 - 83 dari 118 trayek hanya tercatat titik awal dan akhirnya, tanpa halte di antaranya. Untuk trayek seperti itu, situs tidak tahu angkotnya lewat mana, sehingga rute yang sebenarnya ada bisa tidak ketemu.
 - Koordinat halte adalah perkiraan, belum diukur di lapangan.
 - Trayek angkot sering berubah, jadi sebagian data mungkin sudah tidak berlaku.
 - Satu trayek (KPUM 86) baru tercatat satu titik dan tidak ikut dalam pencarian.
 
-Keterbatasan lain:
+Di luar soal data:
 
 - Perkiraan waktu tidak memperhitungkan kemacetan, dan angkot tidak punya jadwal tetap.
 - Tarif belum ditampilkan.
