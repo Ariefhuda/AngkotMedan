@@ -1,105 +1,177 @@
 # AngkotMedan
 
-Web pencari rute angkot di Kota Medan. Ketik tempat asal dan tujuan, lalu situs ini menampilkan angkot nomor berapa yang bisa dinaiki, di mana naik dan turunnya, dan perlu pindah angkot atau tidak.
+Web pencari rute angkot di Kota Medan. Ketik tempat asal dan tujuan, lalu situs ini memberi petunjuk langkah demi langkah: jalan kaki ke halte mana, naik angkot nomor berapa dan warna apa, turun di mana, dan pindah ke angkot apa kalau perlu.
 
-Demo: https://angkotmedan.netlify.app
+Situs: https://angkotmedan.vercel.app
 
-Proyek ini dibuat karena informasi trayek angkot Medan sulit dicari. Tidak ada satu halaman pun yang memuat semua trayek, jadi pendatang biasanya harus bertanya ke orang di jalan. Situs ini bukan layanan resmi Dishub Kota Medan.
+Proyek ini dibuat untuk orang yang baru datang ke Medan. Informasi trayek angkot tidak terkumpul di satu tempat, jadi pendatang biasanya harus bertanya ke orang di jalan. Situs ini bukan layanan resmi Dishub Kota Medan.
 
-## Fitur
+## Alur pemakaian
 
-- Cari rute langsung dari asal ke tujuan.
-- Cari rute dengan satu kali pindah angkot kalau tidak ada rute langsung. Titik pindah yang dipilih adalah yang jumlah haltenya paling sedikit.
-- Peta tiap rute. Garisnya mengikuti jalan, bukan garis lurus antarhalte.
-- Saran nama halte saat mengetik. Singkatan ikut dikenali, jadi "Terminal Amplas" cocok dengan "T. Amplas".
-- Tombol "Lokasi saya" untuk mengisi asal dari GPS.
-- "Lacak Rute Ini" untuk melihat posisi sendiri di peta selama perjalanan.
-- Halaman Semua Trayek berisi daftar seluruh trayek, bisa dicari dan disaring menurut warna angkot.
-- Antarmuka dalam 8 bahasa: Indonesia, Inggris, Jawa, Melayu, Batak, Minang, Sunda, Aceh.
+1. Ketik asal dan tujuan. Yang bisa diketik bukan cuma nama halte, tetapi juga nama tempat seperti mal, kampus, rumah sakit, atau jalan. Tombol "Lokasi saya" mengisi asal dari GPS.
+2. Server mencari halte dalam jarak 1 km dari kedua tempat itu, lalu mencari rangkaian angkot tercepat di antaranya, paling banyak dua kali pindah.
+3. Hasil tampil sebagai beberapa pilihan, yang tercepat di atas. Tiap pilihan berisi:
+   - pelat nomor angkot dengan warna badannya, sesuai urutan naik;
+   - perkiraan lama perjalanan, jumlah pindah, dan jarak jalan kaki;
+   - langkah per langkah: jalan kaki, naik (dengan arah yang tertulis di angkotnya), turun, pindah;
+   - peta dengan garis berwarna angkot dan garis putus-putus untuk jalan kaki.
+4. "Pantau posisi saya di rute ini" menampilkan posisi GPS di atas rute, supaya tahu kapan harus turun.
 
-Trayek satu arah hanya ditawarkan searah urutan haltenya. Trayek pulang-pergi ditawarkan ke dua arah.
+Kalau tidak ada rute, situs menjelaskan sebabnya: tempat tidak dikenali, tidak ada halte dalam 1 km (beserta halte terdekat), atau asal dan tujuan cukup dekat untuk jalan kaki.
 
-## Data
+Halaman lain: **Semua Trayek** (daftar 118 trayek, bisa dicari dan disaring menurut warna) dan **Tentang**. Antarmuka tersedia dalam 8 bahasa; teks hasil pencarian baru ada dalam bahasa Indonesia.
 
-Semua data ada di `js/data.js`.
+## Susunan
 
-| Isi | Jumlah |
-|---|---|
-| Trayek angkot | 118 (97 pulang-pergi, 21 satu arah) |
-| Operator | 17 |
-| Halte dan titik lewat | 190, semuanya punya koordinat |
-| Rute Trans Metro Deli dan Bus Listrik | 10 (sudah ada di data, belum ditampilkan di situs) |
+Satu repo, satu server. Server Express melayani halaman statis dan API sekaligus, tanpa database: data trayek dibaca dari berkas JSON saat server menyala.
 
-`trayek_angkot_medan.csv` adalah bentuk tabel dari daftar trayek yang sama.
+```
+server/app.js       aplikasi Express: API dan halaman statis
+server/engine.js    mesin pencari rute
+server/places.js    pencarian halte dan tempat umum
+server/match.js     pencocokan nama halte dengan ketikan pengguna
+server/index.js     menyalakan server (lokal dan Docker)
+api/index.js        pintu masuk untuk Vercel
+data/               trayek, koordinat halte, rute populer
+public/             halaman web: HTML, CSS, JavaScript, gambar
+test/               tes mesin pencari rute
+Dockerfile          image untuk hosting berbasis container
+vercel.json         pengaturan Vercel
+```
 
-Data dikumpulkan dari sumber publik dan pengamatan di lapangan. Trayek angkot sering berubah, jadi ada kemungkinan sebagian sudah tidak sesuai. Satu trayek (KPUM 86) baru tercatat satu titik sehingga belum bisa dipakai untuk pencarian.
-
-## Warna angkot
-
-Angkot Medan dibedakan dari warna badannya. Kartu hasil pencarian menampilkan warna ini supaya angkotnya mudah dikenali di jalan.
-
-| Warna | Jumlah trayek |
-|---|---|
-| Kuning | 56 |
-| Hijau | 18 |
-| Merah Hijau | 12 |
-| Biru | 11 |
-| Merah Kuning | 10 |
-| Putih, Putih Hijau | 2 |
-| Belum tercatat | 9 |
-
-## Teknologi
-
-| Bagian | Yang dipakai |
-|---|---|
-| Halaman | HTML, Tailwind CSS (lewat CDN), JavaScript tanpa framework |
-| Peta | Leaflet dengan ubin OpenStreetMap |
-| Garis rute di jalan | API publik OSRM |
-| Hosting | Netlify, situs statis |
-
-Tidak ada backend dan tidak ada langkah build. Pencarian rute berjalan di browser.
+Halaman memakai HTML, Tailwind CSS lewat CDN, dan JavaScript tanpa framework. Peta memakai Leaflet dengan ubin OpenStreetMap.
 
 ## Menjalankan di komputer sendiri
 
-Butuh Node.js, tanpa `npm install`.
+Butuh Node.js 20 ke atas.
 
 ```bash
 git clone https://github.com/Ariefhuda/AngkotMedan.git
 cd AngkotMedan
-node server.js
+npm install
+npm start
 ```
 
-Buka http://localhost:8080. Port bisa diganti dengan `PORT=3000 node server.js`.
+Buka http://localhost:8080. Port bisa diganti dengan `PORT=3000 npm start`.
 
-`server.js` hanya server berkas statis untuk pengembangan. Aturan alamatnya sama dengan `_redirects` yang dipakai Netlify: `/tentang` dan `/semua-trayek` diarahkan ke berkas HTML-nya, alamat lain jatuh ke beranda.
+| Perintah | Kegunaan |
+|---|---|
+| `npm start` | menjalankan server |
+| `npm run dev` | menjalankan server dan memuat ulang saat berkas berubah |
+| `npm test` | menjalankan tes mesin pencari rute |
 
-Peta dan garis rute butuh koneksi internet karena ubin peta dan OSRM diambil dari server luar. Tanpa internet, pencarian tetap jalan tetapi petanya kosong.
+Tidak ada variabel lingkungan yang wajib diisi.
 
-## Susunan berkas
+## Hosting
 
-```
-index.html              beranda: pencarian, hasil rute, pelacakan
-tentang.html            penjelasan proyek dan panduan warna angkot
-semua-trayek.html       daftar semua trayek
-js/app.js               terjemahan, pencarian rute, peta, tampilan
-js/data.js              trayek, halte, koordinat
-css/style.css           gaya tambahan di luar Tailwind
-server.js               server lokal
-_redirects              aturan alamat untuk Netlify
-trayek_angkot_medan.csv daftar trayek dalam bentuk tabel
-DESIGN.md               catatan sistem desain
+**Vercel.** Repo ini bisa langsung di-deploy: halaman dilayani dari `public/`, dan semua alamat `/api/*` diteruskan ke `api/index.js`.
+
+```bash
+npx vercel deploy --prod
 ```
 
-## Cara kerja pencarian
+**Docker.** Untuk Render, Railway, Fly.io, Cloud Run, atau VPS sendiri:
 
-1. Nama yang diketik dicocokkan ke halte di data. Tanda baca diabaikan dan singkatan umum disamakan (`T.` jadi terminal, `Simp.` jadi simpang, `Jl.` jadi jalan).
-2. Rute langsung: semua trayek yang melewati halte asal dan tujuan dalam arah yang benar.
-3. Rute pindah: pasangan trayek yang bertemu di satu halte. Pasangan yang salah satu trayeknya sudah bisa sampai sendiri dilewati, karena sudah muncul sebagai rute langsung.
-4. Hasil diurutkan dari jumlah halte paling sedikit dan ditampilkan lima per lima.
+```bash
+docker build -t angkotmedan .
+docker run -p 8080:8080 angkotmedan
+```
+
+Container mendengarkan di port dari variabel `PORT`, bawaannya 8080.
+
+## API
+
+Semua jawaban berbentuk JSON.
+
+| Alamat | Kegunaan |
+|---|---|
+| `GET /api/health` | cek server hidup |
+| `GET /api/data` | semua trayek, koordinat halte, dan rute populer |
+| `GET /api/places?q=sun` | saran halte dan tempat umum untuk teks yang diketik |
+| `GET /api/navigate?from=usu&to=amplas` | cari rute dari teks bebas |
+| `GET /api/navigate?from_lat=..&from_lng=..&to_lat=..&to_lng=..` | cari rute dari koordinat |
+
+Pada `/api/navigate`, asal dan tujuan masing-masing boleh berupa teks (`from`, `to`) atau koordinat (`from_lat`, `from_lng`, dan opsional `from_name`; sama untuk `to`). Keduanya bisa dicampur.
+
+Contoh jawaban, diringkas:
+
+```json
+{
+  "from": { "name": "USU", "lat": 3.5613, "lng": 98.6568 },
+  "to": { "name": "Istana Maimun", "lat": 3.5752, "lng": 98.6838 },
+  "itineraries": [
+    {
+      "minutes": 29,
+      "transfers": 0,
+      "walkMeters": 669,
+      "legs": [
+        {
+          "type": "ride",
+          "route": { "id": "R060", "nomor": "41", "warna": "Merah Hijau" },
+          "towards": "Tembung / Batas Kota",
+          "board": { "name": "USU" },
+          "alight": { "name": "Yuki Simpang Raya" },
+          "stopCount": 3,
+          "minutes": 15
+        },
+        { "type": "walk", "to": { "name": "Istana Maimun" }, "meters": 669, "minutes": 9 }
+      ]
+    }
+  ]
+}
+```
+
+Kalau `itineraries` kosong, kolom `reason` menjelaskan sebabnya:
+
+| `reason` | Arti |
+|---|---|
+| `unknown_origin`, `unknown_destination` | teks tidak cocok dengan halte maupun tempat mana pun |
+| `no_stop_near_origin`, `no_stop_near_destination` | tidak ada halte dalam 1 km; `nearest` berisi halte terdekat |
+| `walk` | asal dan tujuan berjarak kurang dari 400 m |
+| `no_route` | tidak ada rangkaian angkot dengan paling banyak dua kali pindah |
+
+## Cara rute dicari
+
+Perjalanan dimodelkan sebagai graf dan dicari dengan algoritma Dijkstra. Yang diminimalkan adalah perkiraan waktu:
+
+| Bagian | Hitungan |
+|---|---|
+| Jalan kaki | 4,5 km/jam, jarak lurus dikali 1,3 |
+| Naik angkot | 20 km/jam, jarak lurus antarhalte dikali 1,25 |
+| Menunggu angkot | 5 menit tiap naik |
+| Pindah angkot | tambahan 6 menit, supaya rute dengan sedikit pindah lebih diutamakan |
+
+Aturan lain:
+
+- Trayek satu arah hanya bisa dinaiki searah urutan haltenya. Trayek pulang-pergi bisa ke dua arah.
+- Halte dengan nama berbeda tetapi berjarak di bawah 60 m dianggap satu tempat. Contohnya "Belawan", "T. Belawan", dan "Terminal Belawan".
+- Pindah angkot boleh sambil jalan kaki ke halte lain sejauh paling banyak 350 m.
+- Pilihan yang lebih lama, lebih banyak pindah, dan tidak menghemat jalan kaki tidak ditampilkan. Paling banyak lima pilihan.
+
+## Data
+
+| Isi | Jumlah |
+|---|---|
+| Trayek angkot | 118 (97 pulang-pergi, 21 satu arah), dari 17 operator |
+| Halte dan titik lewat | 190 nama di 136 lokasi |
+
+Berkasnya ada di `data/`: `routes.json`, `stops.json`, `popular.json`, dan `trayek_angkot_medan.csv` sebagai bentuk tabel dari daftar trayek. `public_transport.json` berisi 10 rute Trans Metro Deli dan Bus Listrik yang belum dipakai di pencarian.
+
+Data dikumpulkan dari sumber publik dan pengamatan di lapangan.
 
 ## Keterbatasan
 
-- Rute dengan dua kali pindah belum dicari.
-- Estimasi waktu di kartu hasil adalah perkiraan kasar dari jumlah halte, bukan dari kondisi lalu lintas.
-- Tailwind dimuat dari CDN. Itu cukup untuk proyek ini, tetapi browser akan menampilkan peringatan di konsol.
-- OSRM yang dipakai adalah server demo publik. Kalau server itu lambat atau menolak, garis rute kembali jadi garis lurus antarhalte.
+Yang paling menentukan mutu hasil adalah datanya, dan data itu masih kasar:
+
+- 83 dari 118 trayek hanya tercatat titik awal dan akhirnya, tanpa halte di antaranya. Untuk trayek seperti itu, situs tidak tahu angkotnya lewat mana, sehingga rute yang sebenarnya ada bisa tidak ketemu.
+- Koordinat halte adalah perkiraan, belum diukur di lapangan.
+- Trayek angkot sering berubah, jadi sebagian data mungkin sudah tidak berlaku.
+- Satu trayek (KPUM 86) baru tercatat satu titik dan tidak ikut dalam pencarian.
+
+Keterbatasan lain:
+
+- Perkiraan waktu tidak memperhitungkan kemacetan, dan angkot tidak punya jadwal tetap.
+- Tarif belum ditampilkan.
+- Pencarian tempat umum memakai Photon, layanan publik berbasis OpenStreetMap. Kalau layanan itu lambat atau mati, saran yang muncul hanya nama halte.
+- Garis rute di peta memakai server demo publik OSRM. Kalau server itu tidak menjawab, garisnya lurus antarhalte.
+- Tailwind dimuat dari CDN, jadi browser menampilkan peringatan di konsol.
